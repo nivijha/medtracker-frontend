@@ -3,8 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Activity, Calendar, FileText, Stethoscope } from "lucide-react";
 import { useRouter } from "next/navigation";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import { getReports } from "@/lib/utils";
 
 const DashboardCard = ({ title, value, subtitle, icon: Icon }) => (
   <div className="p-6 bg-white rounded-lg border space-y-2 shadow-sm hover:shadow-md transition">
@@ -25,16 +24,15 @@ export default function DashboardPage() {
   const router = useRouter();
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
     const token = localStorage.getItem("token");
     if (!token) {
       router.push("/login");
       return;
     }
 
-    fetch(`${API_URL}/api/reports`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
+    getReports()
       .then((data) => setReports(data || []))
       .catch((err) => console.error("Error fetching reports:", err))
       .finally(() => setLoading(false));

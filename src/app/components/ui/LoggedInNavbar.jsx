@@ -20,8 +20,10 @@ export default function LoggedInNavbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    const userData = JSON.parse(localStorage.getItem("user"));
-    if (userData) setUser(userData);
+    if (typeof window !== "undefined") {
+        const userData = JSON.parse(localStorage.getItem("user"));
+        if (userData) setUser(userData);
+    }
   }, []);
 
   const handleLogout = () => {
