@@ -64,10 +64,13 @@ export default function LoggedInNavbar() {
       {/* Right: User + Logout */}
       <div className="flex items-center gap-3">
         {user && (
-          <div className="w-8 h-8 flex items-center justify-center bg-blue-600 text-white rounded-full font-semibold">
+          <button
+            onClick={() => router.push("/profile")}
+            className="w-8 h-8 flex items-center justify-center bg-blue-600 text-white rounded-full font-semibold hover:bg-blue-700 transition-colors cursor-pointer"
+            title="View Profile"
+          >
             {user.name.charAt(0).toUpperCase()}
-            </div>
-
+          </button>
         )}
         <button
           onClick={handleLogout}
@@ -98,10 +101,14 @@ export default function LoggedInNavbar() {
             <Settings size={18} /> Settings
           </Link>
           {user && (
-            <div className="flex items-center gap-2 text-gray-700 border-t pt-3">
+            <Link 
+              href="/profile" 
+              onClick={() => setMenuOpen(false)} 
+              className="flex items-center gap-2 text-gray-700 border-t pt-3 hover:text-blue-600"
+            >
               <User className="text-blue-600 w-4 h-4" />
               <span className="font-medium">{user.name.split(" ")[0]}</span>
-            </div>
+            </Link>
           )}
         </div>
       )}
