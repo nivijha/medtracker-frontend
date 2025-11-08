@@ -69,8 +69,6 @@ A modern, user-friendly medical records management system built with Next.js. Me
 4. **Run the development server**
    ```bash
    npm run dev
-   # or
-   yarn dev
    ```
 
 5. **Open your browser**
@@ -181,5 +179,3 @@ Contributions are welcome! Please follow these steps:
 - [Backend Repository](https://github.com/nivijha/medtracker-backend)
 
 ---
-
-Made with ❤️ by [Your Name]
