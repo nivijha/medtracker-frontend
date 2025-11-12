@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { 
-  Activity, 
-  Calendar, 
-  FileText, 
+import {
+  Activity,
+  Calendar,
+  FileText,
   Stethoscope,
   TrendingUp,
   Clock,
@@ -13,6 +13,8 @@ import {
   User,
   Bell
 } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const DashboardCard = ({ title, value, subtitle, icon: Icon, trend, onClick, highlight }) => (
   <div 
@@ -68,22 +70,24 @@ const ActivityItem = ({ title, time, type, status }) => {
 };
 
 const QuickAction = ({ icon: Icon, label, onClick }) => (
-  <button
+  <div
     onClick={onClick}
-    className="flex flex-col items-center gap-2 p-4 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all group"
+    className="flex flex-col items-center gap-2 p-4 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all group cursor-pointer"
   >
     <div className="p-3 bg-blue-50 rounded-lg group-hover:bg-blue-100 transition-colors">
       <Icon className="w-5 h-5 text-blue-600" />
     </div>
     <span className="text-sm font-medium text-gray-700">{label}</span>
-  </button>
+  </div>
 );
 
 export default function EnhancedDashboard() {
+  const router = useRouter();
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState("User");
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
     // Simulate fetching reports
@@ -141,11 +145,43 @@ export default function EnhancedDashboard() {
             </p>
           </div>
           <div className="flex gap-3">
-            <button className="p-3 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-all relative">
-              <Bell className="w-5 h-5 text-gray-600" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
-            <button className="p-3 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-all">
+            <div className="relative">
+              <button
+                className="p-3 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-all relative"
+                onClick={() => setShowNotifications(!showNotifications)}
+              >
+                <Bell className="w-5 h-5 text-gray-600" />
+                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
+              </button>
+              {showNotifications && (
+                <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                  <div className="p-4 border-b border-gray-200">
+                    <h3 className="font-semibold text-gray-900">Notifications</h3>
+                  </div>
+                  <div className="max-h-96 overflow-y-auto">
+                    <div className="p-4 border-b border-gray-100 hover:bg-gray-50">
+                      <p className="text-sm font-medium text-gray-900">Appointment Reminder</p>
+                      <p className="text-xs text-gray-500 mt-1">Cardiology appointment tomorrow at 2:00 PM</p>
+                      <p className="text-xs text-gray-400 mt-1">2 hours ago</p>
+                    </div>
+                    <div className="p-4 border-b border-gray-100 hover:bg-gray-50">
+                      <p className="text-sm font-medium text-gray-900">Lab Results Available</p>
+                      <p className="text-xs text-gray-500 mt-1">Your blood test results are ready to view</p>
+                      <p className="text-xs text-gray-400 mt-1">Yesterday</p>
+                    </div>
+                    <div className="p-4 hover:bg-gray-50">
+                      <p className="text-sm font-medium text-gray-900">Medication Refill</p>
+                      <p className="text-xs text-gray-500 mt-1">Metformin needs refill in 12 days</p>
+                      <p className="text-xs text-gray-400 mt-1">3 days ago</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            <button
+              className="p-3 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-all"
+              onClick={() => router.push('/profile')}
+            >
               <User className="w-5 h-5 text-gray-600" />
             </button>
           </div>
@@ -158,7 +194,10 @@ export default function EnhancedDashboard() {
             <p className="text-sm font-medium text-amber-900">Upcoming Appointment Reminder</p>
             <p className="text-sm text-amber-700 mt-1">You have a cardiology appointment tomorrow at 2:00 PM. Don't forget to bring your insurance card.</p>
           </div>
-          <button className="text-sm text-amber-700 hover:text-amber-900 font-medium">
+          <button
+            className="text-sm text-amber-700 hover:text-amber-900 font-medium"
+            onClick={() => router.push('/appointments')}
+          >
             View Details
           </button>
         </div>
@@ -171,7 +210,7 @@ export default function EnhancedDashboard() {
             subtitle="Next: Tomorrow 2:00 PM"
             icon={Calendar}
             highlight={true}
-            onClick={() => console.log('Navigate to appointments')}
+            onClick={() => router.push('/appointments')}
           />
           <DashboardCard
             title="Medical Reports"
@@ -179,21 +218,21 @@ export default function EnhancedDashboard() {
             subtitle="1 new result available"
             icon={FileText}
             trend="+2"
-            onClick={() => console.log('Navigate to reports')}
+            onClick={() => router.push('/reports')}
           />
           <DashboardCard
             title="Active Medications"
             value="3"
             subtitle="1 refill needed soon"
             icon={Activity}
-            onClick={() => console.log('Navigate to medications')}
+            onClick={() => router.push('/medications')}
           />
           <DashboardCard
             title="Next Check-up"
             value="Apr 15"
             subtitle="Annual physical exam"
             icon={Stethoscope}
-            onClick={() => console.log('Navigate to check-ups')}
+            onClick={() => router.push('/appointments')}
           />
         </div>
 
@@ -211,7 +250,10 @@ export default function EnhancedDashboard() {
               ))}
             </div>
             <div className="p-4 border-t border-gray-200">
-              <button className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1">
+              <button
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+                onClick={() => router.push('/reports')}
+              >
                 View all activity
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -225,25 +267,25 @@ export default function EnhancedDashboard() {
               <p className="text-sm text-gray-500 mt-1">Frequently used features</p>
             </div>
             <div className="p-4 grid grid-cols-2 gap-3">
-              <QuickAction 
-                icon={Calendar} 
-                label="Book Appointment" 
-                onClick={() => console.log('Book appointment')}
+              <QuickAction
+                icon={Calendar}
+                label="Book Appointment"
+                onClick={() => router.push('/appointments')}
               />
-              <QuickAction 
-                icon={FileText} 
-                label="View Reports" 
-                onClick={() => console.log('View reports')}
+              <QuickAction
+                icon={FileText}
+                label="View Reports"
+                onClick={() => router.push('/reports')}
               />
-              <QuickAction 
-                icon={Activity} 
-                label="Medications" 
-                onClick={() => console.log('Medications')}
+              <QuickAction
+                icon={Activity}
+                label="Medications"
+                onClick={() => router.push('/medications')}
               />
-              <QuickAction 
-                icon={User} 
-                label="My Profile" 
-                onClick={() => console.log('My profile')}
+              <QuickAction
+                icon={User}
+                label="My Profile"
+                onClick={() => router.push('/profile')}
               />
             </div>
           </div>
@@ -258,7 +300,10 @@ export default function EnhancedDashboard() {
                 Your recent blood work shows improvement in cholesterol levels. Keep up the great work with your diet and exercise routine!
               </p>
             </div>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+            <button
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+              onClick={() => router.push('/reports')}
+            >
               Learn More
             </button>
           </div>
