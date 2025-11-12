@@ -114,17 +114,29 @@ export default function DataExportPage() {
     e.preventDefault();
     try {
       setExporting(true);
-      const result = await exportUserData(exportData);
+      const response = await exportUserData(exportData);
       
-      // Create download link
-      if (result.downloadUrl) {
-        const a = document.createElement('a');
-        a.href = result.downloadUrl;
-        a.download = `medtracker-export.${exportData.format}`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+      // Create download link from blob
+      const blob = new Blob([response.data]);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      
+      // Get filename from Content-Disposition header or use default
+      const contentDisposition = response.headers['content-disposition'];
+      let filename = `medtracker-export.${exportData.format}`;
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
       }
+      
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
       
       // Refresh export history
       fetchExportHistory();

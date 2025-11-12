@@ -20,6 +20,7 @@ import {
   getReports,
   uploadReport,
   downloadReport,
+  viewReport,
   deleteReport
 } from "@/lib/utils";
 
@@ -46,7 +47,7 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-const ReportCard = ({ report, onView, onDownload }) => {
+const ReportCard = ({ report, onView, onDownload, onDelete }) => {
   return (
     <div className="p-5 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all group">
       <div className="flex items-start justify-between mb-3">
@@ -56,10 +57,10 @@ const ReportCard = ({ report, onView, onDownload }) => {
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
-              {report.name}
+              {report.originalName}
             </h3>
             <p className="text-sm text-gray-600 line-clamp-2">
-              {report.result || report.description || "No description available"}
+              {report.fileDescription || report.description || "No description available"}
             </p>
           </div>
         </div>
@@ -67,24 +68,29 @@ const ReportCard = ({ report, onView, onDownload }) => {
       </div>
       
       <div className="flex items-center gap-4 text-xs text-gray-500 mb-4">
-        {report.date && (
+        {report.reportDate && (
           <span className="flex items-center gap-1">
             <Calendar className="w-3.5 h-3.5" />
-            {new Date(report.date).toLocaleDateString('en-US', { 
-              month: 'short', 
-              day: 'numeric', 
-              year: 'numeric' 
+            {new Date(report.reportDate).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric'
             })}
           </span>
         )}
-        {report.doctor && (
+        {report.doctorName && (
           <span className="flex items-center gap-1">
-            Dr. {report.doctor}
+            Dr. {report.doctorName}
           </span>
         )}
-        {report.category && (
+        {report.reportType && (
           <span className="px-2 py-0.5 bg-gray-100 rounded-full">
-            {report.category}
+            {report.reportType}
+          </span>
+        )}
+        {report.size && (
+          <span className="flex items-center gap-1">
+            {(report.size / 1024 / 1024).toFixed(2)} MB
           </span>
         )}
       </div>
@@ -230,26 +236,37 @@ export default function EnhancedReportsPage() {
   };
 
   const filteredReports = reports.filter(report => {
-    const matchesSearch = report.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         (report.result && report.result.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesSearch = report.originalName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (report.description && report.description.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesStatus = filters.status === 'all' || report.status === filters.status;
-    const matchesCategory = filters.category === 'all' || report.category === filters.category;
+    const matchesCategory = filters.category === 'all' || report.reportType === filters.category;
     
     return matchesSearch && matchesStatus && matchesCategory;
   });
 
-  const handleView = (report) => {
-    // For now, just log the report. In a real app, this would open a detailed view
-    console.log('View report:', report);
+  const handleView = async (report) => {
+    try {
+      const blob = await viewReport(report.reportId, report.fileId);
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      // Clean up the object URL after a short delay to allow the new window to load
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+      }, 1000);
+    } catch (error) {
+      console.error("Error viewing report:", error);
+    }
   };
 
   const handleDownload = async (report) => {
     try {
-      const blob = await downloadReport(report._id, report.fileId);
+      // The backend expects reportId and fileId
+      // reportId is the report._id and fileId is the document._id
+      const blob = await downloadReport(report.reportId, report.fileId);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${report.name}.${report.fileType || 'pdf'}`;
+      a.download = report.originalName;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -262,7 +279,9 @@ export default function EnhancedReportsPage() {
   const handleDelete = async (report) => {
     if (window.confirm("Are you sure you want to delete this report?")) {
       try {
-        await deleteReport(report._id, report.fileId);
+        // The backend expects reportId and fileId
+        // reportId is the report._id and fileId is the document._id
+        await deleteReport(report.reportId, report.fileId);
         fetchReports();
       } catch (error) {
         console.error("Error deleting report:", error);
@@ -397,9 +416,9 @@ export default function EnhancedReportsPage() {
         {/* Reports Grid */}
         {filteredReports.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {filteredReports.map((report) => (
+            {filteredReports.map((report, index) => (
               <ReportCard
-                key={report._id}
+                key={`${report._id || report.reportId || `report-${index}`}`}
                 report={report}
                 onView={handleView}
                 onDownload={handleDownload}

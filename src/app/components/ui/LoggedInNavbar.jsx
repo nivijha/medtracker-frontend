@@ -61,21 +61,21 @@ export default function LoggedInNavbar() {
         <Link href="/appointments" className={`flex items-center gap-1 ${isActive("/appointments")}`}>
           <Calendar size={18} /> <span>Appointments</span>
         </Link>
-        <Link href="/medications" className={`flex items-center gap-1 ${isActive("/medications")}`}>
+        {/* <Link href="/medications" className={`flex items-center gap-1 ${isActive("/medications")}`}>
           <Activity size={18} /> <span>Medications</span>
         </Link>
         <Link href="/health-metrics" className={`flex items-center gap-1 ${isActive("/health-metrics")}`}>
           <Heart size={18} /> <span>Health Metrics</span>
-        </Link>
+        </Link> */}
         <Link href="/reports" className={`flex items-center gap-1 ${isActive("/reports")}`}>
           <FileText size={18} /> <span>Reports</span>
         </Link>
-        <Link href="/notifications" className={`flex items-center gap-1 ${isActive("/notifications")}`}>
+        {/* <Link href="/notifications" className={`flex items-center gap-1 ${isActive("/notifications")}`}>
           <Bell size={18} /> <span>Notifications</span>
         </Link>
         <Link href="/data-export" className={`flex items-center gap-1 ${isActive("/data-export")}`}>
           <Download size={18} /> <span>Data Export</span>
-        </Link>
+        </Link> */}
         <Link href="/settings" className={`flex items-center gap-1 ${isActive("/settings")}`}>
           <Settings size={18} /> <span>Settings</span>
         </Link>
