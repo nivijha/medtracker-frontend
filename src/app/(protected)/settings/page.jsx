@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Bell,
   Lock,
@@ -16,6 +16,12 @@ import {
   Eye,
   EyeOff
 } from "lucide-react";
+import {
+  updateUserPreferences,
+  updateUserSecurity,
+  deleteUserAccount
+} from "@/lib/utils";
+import Link from "next/link";
 
 const SettingSection = ({ title, description, children }) => (
   <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
@@ -112,13 +118,74 @@ export default function SettingsPage() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [saveStatus, setSaveStatus] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSave = () => {
+  useEffect(() => {
+    // Load user preferences from localStorage or API
+    if (typeof window !== "undefined") {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      if (user.preferences) {
+        setNotifications(prev => ({ ...prev, ...user.preferences.notifications }));
+        setPrivacy(prev => ({ ...prev, ...user.preferences.privacy }));
+        setAppearance(prev => ({ ...prev, ...user.preferences.appearance }));
+      }
+    }
+  }, []);
+
+  const handleSave = async () => {
     setSaveStatus('saving');
-    setTimeout(() => {
+    setLoading(true);
+    try {
+      const preferences = {
+        notifications,
+        privacy,
+        appearance
+      };
+      
+      await updateUserPreferences(preferences);
+      
+      // Update localStorage
+      if (typeof window !== "undefined") {
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        localStorage.setItem("user", JSON.stringify({
+          ...user,
+          preferences
+        }));
+      }
+      
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus(null), 2000);
-    }, 1000);
+    } catch (error) {
+      console.error("Error saving settings:", error);
+      setSaveStatus('error');
+      setTimeout(() => setSaveStatus(null), 2000);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePasswordChange = async () => {
+    // This would typically open a modal or navigate to password change page
+    console.log("Password change functionality would be implemented here");
+  };
+
+  const handleDeleteAccount = async () => {
+    if (window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+      try {
+        await deleteUserAccount();
+        
+        // Clear local storage and redirect
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          document.cookie = "token=; path=/; max-age=0;";
+        }
+        
+        window.location.href = "/login";
+      } catch (error) {
+        console.error("Error deleting account:", error);
+      }
+    }
   };
 
   const handleLogout = () => {
@@ -395,9 +462,9 @@ export default function SettingsPage() {
           />
           <QuickActionCard
             icon={CreditCard}
-            label="Billing & Plans"
-            description="Manage your subscription"
-            onClick={() => console.log('Billing')}
+            label="Data Export"
+            description="Download your medical data"
+            onClick={() => window.location.href = '/data-export'}
           />
           <QuickActionCard
             icon={Shield}
@@ -417,6 +484,25 @@ export default function SettingsPage() {
         {/* Footer */}
         <div className="text-center text-sm text-gray-500 py-4">
           Version 1.0.0 • Last updated: November 2024
+        </div>
+
+        {/* Delete Account Section */}
+        <div className="mt-6 bg-red-50 border border-red-200 rounded-xl p-6">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <h3 className="font-semibold text-red-900 mb-2">Danger Zone</h3>
+              <p className="text-sm text-red-700 mb-4">
+                Once you delete your account, there is no going back. Please be certain.
+              </p>
+              <button
+                onClick={handleDeleteAccount}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+              >
+                Delete Account
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Heart, Calendar, FileText, Activity, Shield, Bell, ChevronRight, Menu, X } from 'lucide-react';
+import { Heart, Calendar as CalendarIcon, FileText, Activity, Shield, Bell, ChevronRight, Menu, X } from 'lucide-react';
 import Link from 'next/link';
 
 export default function LandingPage() {
@@ -14,7 +14,7 @@ export default function LandingPage() {
       description: "Securely store and organize all your medical documents in one place"
     },
     {
-      icon: <Calendar className="w-8 h-8" />,
+      icon: <CalendarIcon className="w-8 h-8" />,
       title: "Appointments",
       description: "Schedule and manage your healthcare appointments effortlessly"
     },
