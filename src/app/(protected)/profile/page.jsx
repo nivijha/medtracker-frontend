@@ -20,6 +20,12 @@ import {
   Award,
   TrendingUp
 } from "lucide-react";
+import {
+  getUserProfile,
+  updateUserProfile,
+  updateUserPreferences,
+  getHealthSummary
+} from "@/lib/utils";
 
 const StatCard = ({ icon: Icon, label, value, color = "blue" }) => {
   const colors = {
@@ -105,32 +111,69 @@ export default function EnhancedProfilePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const u = localStorage.getItem("user");
+    fetchUserProfile();
+  }, []);
+
+  const fetchUserProfile = async () => {
+    try {
+      setLoading(true);
+      const [profileData, healthSummary] = await Promise.all([
+        getUserProfile(),
+        getHealthSummary()
+      ]);
+      
+      // Combine profile data with localStorage user data
+      const u = typeof window !== "undefined" ? localStorage.getItem("user") : null;
+      let localUser = {};
       if (u) {
         try {
-          const parsedUser = JSON.parse(u);
-          // Add additional fields if not present
-          const fullUser = {
-            name: parsedUser.name || '',
-            email: parsedUser.email || '',
-            phone: parsedUser.phone || '',
-            address: parsedUser.address || '',
-            dateOfBirth: parsedUser.dateOfBirth || '',
-            bloodType: parsedUser.bloodType || '',
-            emergencyContact: parsedUser.emergencyContact || '',
-            joinDate: parsedUser.joinDate || new Date().toISOString(),
-            ...parsedUser
-          };
-          setUser(fullUser);
-          setEditedUser(fullUser);
+          localUser = JSON.parse(u);
         } catch (error) {
           console.error("Error parsing user data:", error);
         }
       }
+      
+      const fullUser = {
+        name: profileData.name || localUser.name || '',
+        email: profileData.email || localUser.email || '',
+        phone: profileData.phone || localUser.phone || '',
+        address: profileData.address || localUser.address || '',
+        dateOfBirth: profileData.dateOfBirth || localUser.dateOfBirth || '',
+        bloodType: profileData.bloodType || localUser.bloodType || '',
+        emergencyContact: profileData.emergencyContact || localUser.emergencyContact || '',
+        joinDate: profileData.joinDate || localUser.joinDate || new Date().toISOString(),
+        ...profileData
+      };
+      
+      setUser(fullUser);
+      setEditedUser(fullUser);
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      // Fallback to localStorage data if API fails
+      const u = typeof window !== "undefined" ? localStorage.getItem("user") : null;
+      if (u) {
+        try {
+          const localUser = JSON.parse(u);
+          const fallbackUser = {
+            name: localUser.name || '',
+            email: localUser.email || '',
+            phone: localUser.phone || '',
+            address: localUser.address || '',
+            dateOfBirth: localUser.dateOfBirth || '',
+            bloodType: localUser.bloodType || '',
+            emergencyContact: localUser.emergencyContact || '',
+            joinDate: localUser.joinDate || new Date().toISOString()
+          };
+          setUser(fallbackUser);
+          setEditedUser(fallbackUser);
+        } catch (parseError) {
+          console.error("Error parsing user data:", parseError);
+        }
+      }
+    } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -142,9 +185,11 @@ export default function EnhancedProfilePage() {
     setEditedUser({ ...user });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setSaveStatus('saving');
-    setTimeout(() => {
+    try {
+      await updateUserProfile(editedUser);
+      
       if (typeof window !== "undefined") {
         localStorage.setItem("user", JSON.stringify(editedUser));
       }
@@ -152,7 +197,20 @@ export default function EnhancedProfilePage() {
       setIsEditing(false);
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus(null), 2000);
-    }, 1000);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      // If backend is not available, still save to localStorage
+      if (typeof window !== "undefined") {
+        localStorage.setItem("user", JSON.stringify(editedUser));
+        setUser(editedUser);
+        setIsEditing(false);
+        setSaveStatus('saved');
+        setTimeout(() => setSaveStatus(null), 2000);
+      } else {
+        setSaveStatus('error');
+        setTimeout(() => setSaveStatus(null), 2000);
+      }
+    }
   };
 
   const updateField = (field, value) => {

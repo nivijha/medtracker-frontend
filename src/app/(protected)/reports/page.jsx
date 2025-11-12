@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { 
-  FileText, 
-  Search, 
-  Filter, 
-  Download, 
+import {
+  FileText,
+  Search,
+  Filter,
+  Download,
   Eye,
   Calendar,
   Clock,
@@ -13,8 +13,16 @@ import {
   X,
   AlertCircle,
   CheckCircle,
-  Loader2
+  Loader2,
+  Upload
 } from "lucide-react";
+import {
+  getReports,
+  uploadReport,
+  downloadReport,
+  viewReport,
+  deleteReport
+} from "@/lib/utils";
 
 const StatusBadge = ({ status }) => {
   const styles = {
@@ -39,7 +47,7 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-const ReportCard = ({ report, onView, onDownload }) => {
+const ReportCard = ({ report, onView, onDownload, onDelete }) => {
   return (
     <div className="p-5 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all group">
       <div className="flex items-start justify-between mb-3">
@@ -49,10 +57,10 @@ const ReportCard = ({ report, onView, onDownload }) => {
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
-              {report.name}
+              {report.originalName}
             </h3>
             <p className="text-sm text-gray-600 line-clamp-2">
-              {report.result || report.description || "No description available"}
+              {report.fileDescription || report.description || "No description available"}
             </p>
           </div>
         </div>
@@ -60,24 +68,29 @@ const ReportCard = ({ report, onView, onDownload }) => {
       </div>
       
       <div className="flex items-center gap-4 text-xs text-gray-500 mb-4">
-        {report.date && (
+        {report.reportDate && (
           <span className="flex items-center gap-1">
             <Calendar className="w-3.5 h-3.5" />
-            {new Date(report.date).toLocaleDateString('en-US', { 
-              month: 'short', 
-              day: 'numeric', 
-              year: 'numeric' 
+            {new Date(report.reportDate).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric'
             })}
           </span>
         )}
-        {report.doctor && (
+        {report.doctorName && (
           <span className="flex items-center gap-1">
-            Dr. {report.doctor}
+            Dr. {report.doctorName}
           </span>
         )}
-        {report.category && (
+        {report.reportType && (
           <span className="px-2 py-0.5 bg-gray-100 rounded-full">
-            {report.category}
+            {report.reportType}
+          </span>
+        )}
+        {report.size && (
+          <span className="flex items-center gap-1">
+            {(report.size / 1024 / 1024).toFixed(2)} MB
           </span>
         )}
       </div>
@@ -96,6 +109,14 @@ const ReportCard = ({ report, onView, onDownload }) => {
         >
           <Download className="w-4 h-4" />
         </button>
+        {onDelete && (
+          <button
+            onClick={() => onDelete(report)}
+            className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </div>
     </div>
   );
@@ -174,48 +195,37 @@ export default function EnhancedReportsPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [filters, setFilters] = useState({
     status: 'all',
     category: 'all',
     dateRange: 'all'
   });
+  const [uploadData, setUploadData] = useState({
+    name: "",
+    category: "",
+    doctor: "",
+    date: new Date().toISOString().split('T')[0],
+    file: null,
+    description: ""
+  });
 
   useEffect(() => {
-    // Simulate API call - replace with your actual getReports()
-    setTimeout(() => {
-      const mockReports = [
-        {
-          _id: '1',
-          name: 'Complete Blood Count (CBC)',
-          result: 'All parameters within normal range. Hemoglobin: 14.2 g/dL, WBC: 7,500/µL',
-          date: '2024-11-05',
-          status: 'completed',
-          category: 'lab',
-          doctor: 'Smith'
-        },
-        {
-          _id: '2',
-          name: 'Chest X-Ray',
-          result: 'No acute cardiopulmonary abnormality detected',
-          date: '2024-11-01',
-          status: 'reviewed',
-          category: 'imaging',
-          doctor: 'Johnson'
-        },
-        {
-          _id: '3',
-          name: 'Lipid Panel',
-          result: 'Pending laboratory analysis',
-          date: '2024-11-07',
-          status: 'pending',
-          category: 'lab',
-          doctor: 'Williams'
-        }
-      ];
-      setReports(mockReports);
-      setLoading(false);
-    }, 1000);
+    fetchReports();
   }, []);
+
+  const fetchReports = async () => {
+    try {
+      setLoading(true);
+      const reportsData = await getReports();
+      setReports(reportsData || []);
+    } catch (error) {
+      console.error("Error fetching reports:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleFilterChange = (key, value) => {
     if (key === 'reset') {
@@ -226,22 +236,87 @@ export default function EnhancedReportsPage() {
   };
 
   const filteredReports = reports.filter(report => {
-    const matchesSearch = report.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         (report.result && report.result.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesSearch = report.originalName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (report.description && report.description.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesStatus = filters.status === 'all' || report.status === filters.status;
-    const matchesCategory = filters.category === 'all' || report.category === filters.category;
+    const matchesCategory = filters.category === 'all' || report.reportType === filters.category;
     
     return matchesSearch && matchesStatus && matchesCategory;
   });
 
-  const handleView = (report) => {
-    console.log('View report:', report);
-    // Add navigation to detailed report view
+  const handleView = async (report) => {
+    try {
+      const blob = await viewReport(report.reportId, report.fileId);
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      // Clean up the object URL after a short delay to allow the new window to load
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+      }, 1000);
+    } catch (error) {
+      console.error("Error viewing report:", error);
+    }
   };
 
-  const handleDownload = (report) => {
-    console.log('Download report:', report);
-    // Add download functionality
+  const handleDownload = async (report) => {
+    try {
+      // The backend expects reportId and fileId
+      // reportId is the report._id and fileId is the document._id
+      const blob = await downloadReport(report.reportId, report.fileId);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = report.originalName;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Error downloading report:", error);
+    }
+  };
+
+  const handleDelete = async (report) => {
+    if (window.confirm("Are you sure you want to delete this report?")) {
+      try {
+        // The backend expects reportId and fileId
+        // reportId is the report._id and fileId is the document._id
+        await deleteReport(report.reportId, report.fileId);
+        fetchReports();
+      } catch (error) {
+        console.error("Error deleting report:", error);
+      }
+    }
+  };
+
+  const handleUpload = async (e) => {
+    e.preventDefault();
+    try {
+      setUploading(true);
+      const formData = new FormData();
+      formData.append('name', uploadData.name);
+      formData.append('category', uploadData.category);
+      formData.append('doctor', uploadData.doctor);
+      formData.append('date', uploadData.date);
+      formData.append('description', uploadData.description);
+      formData.append('file', uploadData.file);
+      
+      await uploadReport(formData);
+      setShowUploadModal(false);
+      setUploadData({
+        name: "",
+        category: "",
+        doctor: "",
+        date: new Date().toISOString().split('T')[0],
+        file: null,
+        description: ""
+      });
+      fetchReports();
+    } catch (error) {
+      console.error("Error uploading report:", error);
+    } finally {
+      setUploading(false);
+    }
   };
 
   if (loading) {
@@ -292,6 +367,14 @@ export default function EnhancedReportsPage() {
               onFilterChange={handleFilterChange}
             />
           </div>
+          
+          <button
+            onClick={() => setShowUploadModal(true)}
+            className="flex items-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium"
+          >
+            <Upload className="w-5 h-5" />
+            Upload Report
+          </button>
         </div>
 
         {/* Active Filters */}
@@ -333,12 +416,13 @@ export default function EnhancedReportsPage() {
         {/* Reports Grid */}
         {filteredReports.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {filteredReports.map((report) => (
+            {filteredReports.map((report, index) => (
               <ReportCard
-                key={report._id}
+                key={`${report._id || report.reportId || `report-${index}`}`}
                 report={report}
                 onView={handleView}
                 onDownload={handleDownload}
+                onDelete={handleDelete}
               />
             ))}
           </div>
@@ -351,6 +435,108 @@ export default function EnhancedReportsPage() {
                 ? 'Try adjusting your search or filters'
                 : 'Your medical reports will appear here'}
             </p>
+          </div>
+        )}
+
+        {/* Upload Report Modal */}
+        {showUploadModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Upload Medical Report</h2>
+              <form onSubmit={handleUpload} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Report Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={uploadData.name}
+                    onChange={(e) => setUploadData({...uploadData, name: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                  <select
+                    required
+                    value={uploadData.category}
+                    onChange={(e) => setUploadData({...uploadData, category: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select category</option>
+                    <option value="lab">Lab Tests</option>
+                    <option value="imaging">Imaging</option>
+                    <option value="pathology">Pathology</option>
+                    <option value="cardiology">Cardiology</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Doctor</label>
+                  <input
+                    type="text"
+                    required
+                    value={uploadData.doctor}
+                    onChange={(e) => setUploadData({...uploadData, doctor: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Report Date</label>
+                  <input
+                    type="date"
+                    required
+                    value={uploadData.date}
+                    onChange={(e) => setUploadData({...uploadData, date: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">File</label>
+                  <input
+                    type="file"
+                    required
+                    onChange={(e) => setUploadData({...uploadData, file: e.target.files[0]})}
+                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <textarea
+                    value={uploadData.description}
+                    onChange={(e) => setUploadData({...uploadData, description: e.target.value})}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowUploadModal(false);
+                      setUploadData({
+                        name: "",
+                        category: "",
+                        doctor: "",
+                        date: new Date().toISOString().split('T')[0],
+                        file: null,
+                        description: ""
+                      });
+                    }}
+                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={uploading}
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                  >
+                    {uploading ? 'Uploading...' : 'Upload Report'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
       </div>

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import {
   Activity,
-  Calendar,
+  Calendar as CalendarIcon,
   FileText,
   Stethoscope,
   TrendingUp,
@@ -15,6 +15,13 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import {
+  getDashboardSummary,
+  getUpcomingAppointments,
+  getReports,
+  getMedications,
+  getNotifications
+} from "@/lib/utils";
 
 const DashboardCard = ({ title, value, subtitle, icon: Icon, trend, onClick, highlight }) => (
   <div 
@@ -88,23 +95,50 @@ export default function EnhancedDashboard() {
   const [userName, setUserName] = useState("User");
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showNotifications, setShowNotifications] = useState(false);
+  const [dashboardStats, setDashboardStats] = useState({
+    upcomingAppointments: 0,
+    reports: 0,
+    activeMedications: 0,
+    nextCheckup: "Not scheduled"
+  });
 
   useEffect(() => {
-    // Simulate fetching reports
-    setTimeout(() => {
-      setReports([
-        { id: 1, name: "Blood Test", date: "2024-03-10" },
-        { id: 2, name: "X-Ray", date: "2024-03-05" },
-        { id: 3, name: "MRI Scan", date: "2024-02-28" }
-      ]);
-      setUserName("John Doe");
-      setLoading(false);
-    }, 1000);
+    fetchDashboardData();
 
     // Update time every minute
     const timer = setInterval(() => setCurrentTime(new Date()), 60000);
     return () => clearInterval(timer);
   }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      const [dashboardData, appointments, reports, medications, notifications] = await Promise.all([
+        getDashboardSummary(),
+        getUpcomingAppointments(),
+        getReports(),
+        getMedications(),
+        getNotifications()
+      ]);
+      
+      setReports(reports || []);
+      setUserName(dashboardData.userName || "User");
+      
+      // Set dashboard stats from API response
+      if (dashboardData) {
+        setDashboardStats({
+          upcomingAppointments: dashboardData.upcomingAppointments || appointments?.length || 0,
+          reports: dashboardData.reports || reports?.length || 0,
+          activeMedications: dashboardData.activeMedications || medications?.filter(m => m.status === 'active')?.length || 0,
+          nextCheckup: dashboardData.nextCheckup || "Not scheduled"
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getGreeting = () => {
     const hour = currentTime.getHours();
@@ -206,31 +240,31 @@ export default function EnhancedDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <DashboardCard
             title="Upcoming Appointments"
-            value="2"
-            subtitle="Next: Tomorrow 2:00 PM"
-            icon={Calendar}
-            highlight={true}
+            value={dashboardStats.upcomingAppointments}
+            subtitle={dashboardStats.upcomingAppointments > 0 ? "Next: Soon" : "No upcoming"}
+            icon={CalendarIcon}
+            highlight={dashboardStats.upcomingAppointments > 0}
             onClick={() => router.push('/appointments')}
           />
           <DashboardCard
             title="Medical Reports"
-            value={reports.length}
-            subtitle="1 new result available"
+            value={dashboardStats.reports}
+            subtitle={dashboardStats.reports > 0 ? "Latest available" : "No reports"}
             icon={FileText}
-            trend="+2"
+            trend={dashboardStats.reports > 0 ? "+" + dashboardStats.reports : null}
             onClick={() => router.push('/reports')}
           />
           <DashboardCard
             title="Active Medications"
-            value="3"
-            subtitle="1 refill needed soon"
+            value={dashboardStats.activeMedications}
+            subtitle={dashboardStats.activeMedications > 0 ? "Track your doses" : "No medications"}
             icon={Activity}
             onClick={() => router.push('/medications')}
           />
           <DashboardCard
             title="Next Check-up"
-            value="Apr 15"
-            subtitle="Annual physical exam"
+            value={dashboardStats.nextCheckup !== "Not scheduled" ? "Scheduled" : "Not set"}
+            subtitle={dashboardStats.nextCheckup !== "Not scheduled" ? dashboardStats.nextCheckup : "Schedule one"}
             icon={Stethoscope}
             onClick={() => router.push('/appointments')}
           />
@@ -268,7 +302,7 @@ export default function EnhancedDashboard() {
             </div>
             <div className="p-4 grid grid-cols-2 gap-3">
               <QuickAction
-                icon={Calendar}
+                icon={CalendarIcon}
                 label="Book Appointment"
                 onClick={() => router.push('/appointments')}
               />
