@@ -259,7 +259,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 MedTracker. All rights reserved.</p>
+            <p>&copy; 2026 MedTracker. All rights reserved.</p>
           </div>
         </div>
       </footer>

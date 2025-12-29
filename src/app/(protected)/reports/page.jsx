@@ -14,35 +14,37 @@ import {
   AlertCircle,
   CheckCircle,
   Loader2,
-  Upload
+  Upload,
 } from "lucide-react";
 import {
   getReports,
   uploadReport,
-  downloadReport,
-  viewReport,
-  deleteReport
+  deleteReport,
 } from "@/lib/utils";
 
 const StatusBadge = ({ status }) => {
   const styles = {
     completed: "bg-green-100 text-green-700 border-green-200",
     pending: "bg-yellow-100 text-yellow-700 border-yellow-200",
-    reviewed: "bg-blue-100 text-blue-700 border-blue-200"
+    reviewed: "bg-blue-100 text-blue-700 border-blue-200",
   };
-  
+
   const icons = {
     completed: CheckCircle,
     pending: Clock,
-    reviewed: Eye
+    reviewed: Eye,
   };
-  
+
   const Icon = icons[status] || AlertCircle;
-  
+
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${styles[status] || styles.pending}`}>
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${
+        styles[status] || styles.pending
+      }`}
+    >
       <Icon className="w-3 h-3" />
-      {status || 'pending'}
+      {status || "pending"}
     </span>
   );
 };
@@ -57,24 +59,26 @@ const ReportCard = ({ report, onView, onDownload, onDelete }) => {
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
-              {report.originalName}
+              {report.description || report.type}
             </h3>
             <p className="text-sm text-gray-600 line-clamp-2">
-              {report.fileDescription || report.description || "No description available"}
+              {report.fileDescription ||
+                report.description ||
+                "No description available"}
             </p>
           </div>
         </div>
         <StatusBadge status={report.status} />
       </div>
-      
+
       <div className="flex items-center gap-4 text-xs text-gray-500 mb-4">
         {report.reportDate && (
           <span className="flex items-center gap-1">
             <Calendar className="w-3.5 h-3.5" />
-            {new Date(report.reportDate).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric'
+            {new Date(report.reportDate).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
             })}
           </span>
         )}
@@ -94,7 +98,7 @@ const ReportCard = ({ report, onView, onDownload, onDelete }) => {
           </span>
         )}
       </div>
-      
+
       <div className="flex items-center gap-2">
         <button
           onClick={() => onView(report)}
@@ -124,7 +128,7 @@ const ReportCard = ({ report, onView, onDownload, onDelete }) => {
 
 const FilterDropdown = ({ isOpen, onClose, filters, onFilterChange }) => {
   if (!isOpen) return null;
-  
+
   return (
     <div className="absolute top-full right-0 mt-2 w-64 bg-white rounded-xl border border-gray-200 shadow-lg z-10">
       <div className="p-4 border-b border-gray-200 flex items-center justify-between">
@@ -133,13 +137,15 @@ const FilterDropdown = ({ isOpen, onClose, filters, onFilterChange }) => {
           <X className="w-4 h-4" />
         </button>
       </div>
-      
+
       <div className="p-4 space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
-          <select 
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Status
+          </label>
+          <select
             value={filters.status}
-            onChange={(e) => onFilterChange('status', e.target.value)}
+            onChange={(e) => onFilterChange("status", e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="all">All Statuses</option>
@@ -148,12 +154,14 @@ const FilterDropdown = ({ isOpen, onClose, filters, onFilterChange }) => {
             <option value="reviewed">Reviewed</option>
           </select>
         </div>
-        
+
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-          <select 
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Category
+          </label>
+          <select
             value={filters.category}
-            onChange={(e) => onFilterChange('category', e.target.value)}
+            onChange={(e) => onFilterChange("category", e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="all">All Categories</option>
@@ -163,12 +171,14 @@ const FilterDropdown = ({ isOpen, onClose, filters, onFilterChange }) => {
             <option value="cardiology">Cardiology</option>
           </select>
         </div>
-        
+
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Date Range</label>
-          <select 
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Date Range
+          </label>
+          <select
             value={filters.dateRange}
-            onChange={(e) => onFilterChange('dateRange', e.target.value)}
+            onChange={(e) => onFilterChange("dateRange", e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="all">All Time</option>
@@ -178,9 +188,9 @@ const FilterDropdown = ({ isOpen, onClose, filters, onFilterChange }) => {
             <option value="year">Last Year</option>
           </select>
         </div>
-        
+
         <button
-          onClick={() => onFilterChange('reset')}
+          onClick={() => onFilterChange("reset")}
           className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
         >
           Reset Filters
@@ -198,17 +208,17 @@ export default function EnhancedReportsPage() {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [filters, setFilters] = useState({
-    status: 'all',
-    category: 'all',
-    dateRange: 'all'
+    status: "all",
+    category: "all",
+    dateRange: "all",
   });
   const [uploadData, setUploadData] = useState({
     name: "",
     category: "",
     doctor: "",
-    date: new Date().toISOString().split('T')[0],
+    date: new Date().toISOString().split("T")[0],
     file: null,
-    description: ""
+    description: "",
   });
 
   useEffect(() => {
@@ -228,52 +238,38 @@ export default function EnhancedReportsPage() {
   };
 
   const handleFilterChange = (key, value) => {
-    if (key === 'reset') {
-      setFilters({ status: 'all', category: 'all', dateRange: 'all' });
+    if (key === "reset") {
+      setFilters({ status: "all", category: "all", dateRange: "all" });
     } else {
-      setFilters(prev => ({ ...prev, [key]: value }));
+      setFilters((prev) => ({ ...prev, [key]: value }));
     }
   };
 
-  const filteredReports = reports.filter(report => {
-    const matchesSearch = report.originalName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         (report.description && report.description.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesStatus = filters.status === 'all' || report.status === filters.status;
-    const matchesCategory = filters.category === 'all' || report.reportType === filters.category;
-    
+  const filteredReports = reports.filter((report) => {
+    const matchesSearch =
+      report.description ||
+      report.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (report.description &&
+        report.description.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesStatus =
+      filters.status === "all" || report.status === filters.status;
+    const matchesCategory =
+      filters.category === "all" || report.reportType === filters.category;
+
     return matchesSearch && matchesStatus && matchesCategory;
   });
 
-  const handleView = async (report) => {
-    try {
-      const blob = await viewReport(report.reportId, report.fileId);
-      const url = window.URL.createObjectURL(blob);
-      window.open(url, '_blank');
-      // Clean up the object URL after a short delay to allow the new window to load
-      setTimeout(() => {
-        window.URL.revokeObjectURL(url);
-      }, 1000);
-    } catch (error) {
-      console.error("Error viewing report:", error);
-    }
+  const handleView = (report) => {
+    window.open(report.fileUrl, "_blank");
   };
 
-  const handleDownload = async (report) => {
-    try {
-      // The backend expects reportId and fileId
-      // reportId is the report._id and fileId is the document._id
-      const blob = await downloadReport(report.reportId, report.fileId);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = report.originalName;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error("Error downloading report:", error);
-    }
+  const handleDownload = (report) => {
+    const a = document.createElement("a");
+    a.href = report.fileUrl;
+    a.download = "medical-report";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   };
 
   const handleDelete = async (report) => {
@@ -281,7 +277,7 @@ export default function EnhancedReportsPage() {
       try {
         // The backend expects reportId and fileId
         // reportId is the report._id and fileId is the document._id
-        await deleteReport(report.reportId, report.fileId);
+        await deleteReport(report._id);
         fetchReports();
       } catch (error) {
         console.error("Error deleting report:", error);
@@ -294,22 +290,20 @@ export default function EnhancedReportsPage() {
     try {
       setUploading(true);
       const formData = new FormData();
-      formData.append('name', uploadData.name);
-      formData.append('category', uploadData.category);
-      formData.append('doctor', uploadData.doctor);
-      formData.append('date', uploadData.date);
-      formData.append('description', uploadData.description);
-      formData.append('file', uploadData.file);
-      
+      formData.append("type", uploadData.category || "report");
+      formData.append("description", uploadData.description);
+      formData.append("doctorName", uploadData.doctor);
+      formData.append("file", uploadData.file);
+
       await uploadReport(formData);
       setShowUploadModal(false);
       setUploadData({
         name: "",
         category: "",
         doctor: "",
-        date: new Date().toISOString().split('T')[0],
+        date: new Date().toISOString().split("T")[0],
         file: null,
-        description: ""
+        description: "",
       });
       fetchReports();
     } catch (error) {
@@ -333,8 +327,12 @@ export default function EnhancedReportsPage() {
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Medical Reports</h1>
-          <p className="text-gray-600">View and manage all your medical test results</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Medical Reports
+          </h1>
+          <p className="text-gray-600">
+            View and manage all your medical test results
+          </p>
         </div>
 
         {/* Search and Filter Bar */}
@@ -349,7 +347,7 @@ export default function EnhancedReportsPage() {
               className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
-          
+
           <div className="relative">
             <button
               onClick={() => setShowFilters(!showFilters)}
@@ -357,9 +355,13 @@ export default function EnhancedReportsPage() {
             >
               <Filter className="w-5 h-5" />
               Filters
-              <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+              <ChevronDown
+                className={`w-4 h-4 transition-transform ${
+                  showFilters ? "rotate-180" : ""
+                }`}
+              />
             </button>
-            
+
             <FilterDropdown
               isOpen={showFilters}
               onClose={() => setShowFilters(false)}
@@ -367,7 +369,7 @@ export default function EnhancedReportsPage() {
               onFilterChange={handleFilterChange}
             />
           </div>
-          
+
           <button
             onClick={() => setShowUploadModal(true)}
             className="flex items-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium"
@@ -378,29 +380,31 @@ export default function EnhancedReportsPage() {
         </div>
 
         {/* Active Filters */}
-        {(filters.status !== 'all' || filters.category !== 'all' || filters.dateRange !== 'all') && (
+        {(filters.status !== "all" ||
+          filters.category !== "all" ||
+          filters.dateRange !== "all") && (
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm text-gray-600">Active filters:</span>
-            {filters.status !== 'all' && (
+            {filters.status !== "all" && (
               <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm flex items-center gap-1">
                 Status: {filters.status}
-                <button onClick={() => handleFilterChange('status', 'all')}>
+                <button onClick={() => handleFilterChange("status", "all")}>
                   <X className="w-3 h-3" />
                 </button>
               </span>
             )}
-            {filters.category !== 'all' && (
+            {filters.category !== "all" && (
               <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm flex items-center gap-1">
                 Category: {filters.category}
-                <button onClick={() => handleFilterChange('category', 'all')}>
+                <button onClick={() => handleFilterChange("category", "all")}>
                   <X className="w-3 h-3" />
                 </button>
               </span>
             )}
-            {filters.dateRange !== 'all' && (
+            {filters.dateRange !== "all" && (
               <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm flex items-center gap-1">
                 Date: {filters.dateRange}
-                <button onClick={() => handleFilterChange('dateRange', 'all')}>
+                <button onClick={() => handleFilterChange("dateRange", "all")}>
                   <X className="w-3 h-3" />
                 </button>
               </span>
@@ -418,7 +422,7 @@ export default function EnhancedReportsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {filteredReports.map((report, index) => (
               <ReportCard
-                key={`${report._id || report.reportId || `report-${index}`}`}
+                key={`${report._id || report._id || `report-${index}`}`}
                 report={report}
                 onView={handleView}
                 onDownload={handleDownload}
@@ -429,11 +433,15 @@ export default function EnhancedReportsPage() {
         ) : (
           <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
             <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">No reports found</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-1">
+              No reports found
+            </h3>
             <p className="text-gray-600">
-              {searchQuery || filters.status !== 'all' || filters.category !== 'all'
-                ? 'Try adjusting your search or filters'
-                : 'Your medical reports will appear here'}
+              {searchQuery ||
+              filters.status !== "all" ||
+              filters.category !== "all"
+                ? "Try adjusting your search or filters"
+                : "Your medical reports will appear here"}
             </p>
           </div>
         )}
@@ -442,24 +450,34 @@ export default function EnhancedReportsPage() {
         {showUploadModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Upload Medical Report</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                Upload Medical Report
+              </h2>
               <form onSubmit={handleUpload} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Report Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Report Name
+                  </label>
                   <input
                     type="text"
                     required
                     value={uploadData.name}
-                    onChange={(e) => setUploadData({...uploadData, name: e.target.value})}
+                    onChange={(e) =>
+                      setUploadData({ ...uploadData, name: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Category
+                  </label>
                   <select
                     required
                     value={uploadData.category}
-                    onChange={(e) => setUploadData({...uploadData, category: e.target.value})}
+                    onChange={(e) =>
+                      setUploadData({ ...uploadData, category: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Select category</option>
@@ -471,40 +489,59 @@ export default function EnhancedReportsPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Doctor</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Doctor
+                  </label>
                   <input
                     type="text"
                     required
                     value={uploadData.doctor}
-                    onChange={(e) => setUploadData({...uploadData, doctor: e.target.value})}
+                    onChange={(e) =>
+                      setUploadData({ ...uploadData, doctor: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Report Date</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Report Date
+                  </label>
                   <input
                     type="date"
                     required
                     value={uploadData.date}
-                    onChange={(e) => setUploadData({...uploadData, date: e.target.value})}
+                    onChange={(e) =>
+                      setUploadData({ ...uploadData, date: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">File</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    File
+                  </label>
                   <input
                     type="file"
                     required
-                    onChange={(e) => setUploadData({...uploadData, file: e.target.files[0]})}
+                    onChange={(e) =>
+                      setUploadData({ ...uploadData, file: e.target.files[0] })
+                    }
                     accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Description
+                  </label>
                   <textarea
                     value={uploadData.description}
-                    onChange={(e) => setUploadData({...uploadData, description: e.target.value})}
+                    onChange={(e) =>
+                      setUploadData({
+                        ...uploadData,
+                        description: e.target.value,
+                      })
+                    }
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -518,9 +555,9 @@ export default function EnhancedReportsPage() {
                         name: "",
                         category: "",
                         doctor: "",
-                        date: new Date().toISOString().split('T')[0],
+                        date: new Date().toISOString().split("T")[0],
                         file: null,
-                        description: ""
+                        description: "",
                       });
                     }}
                     className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
@@ -532,7 +569,7 @@ export default function EnhancedReportsPage() {
                     disabled={uploading}
                     className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
                   >
-                    {uploading ? 'Uploading...' : 'Upload Report'}
+                    {uploading ? "Uploading..." : "Upload Report"}
                   </button>
                 </div>
               </form>

@@ -4,7 +4,7 @@ const API = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000",
 });
 
-// ✅ Attach token automatically
+// Attach token automatically
 API.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
     const token = localStorage.getItem("token");
@@ -13,7 +13,7 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
-// ✅ Global error handling (auto logout if token invalid)
+// Global error handling (auto logout if token invalid)
 API.interceptors.response.use(
   (res) => res,
   (err) => {
@@ -27,7 +27,7 @@ API.interceptors.response.use(
   }
 );
 
-// ✅ Auth APIs
+// Auth APIs
 export const registerUser = async (name, email, password) => {
   const res = await API.post("/api/auth/register", { name, email, password });
   return res.data;
@@ -43,41 +43,36 @@ export const getCurrentUser = async () => {
   return res.data;
 };
 
-// ✅ Reports APIs
+
+// ------- REPORT APIs -------
+
+// Get logged-in user's reports
 export const getReports = async () => {
-  const res = await API.get("/api/upload/files");
-  return res.data.files || [];
+  const res = await API.get("api/reports/my");
+  return res.data;
 };
 
+// Upload report (multipart)
 export const uploadReport = async (formData) => {
-  const res = await API.post("/api/upload", formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
-  return res.data.report || res.data;
+  try {
+    const res = await API.post("/api/reports/upload", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res.data;
+  } catch (err) {
+    console.error("UPLOAD ERROR:", err.response?.data || err.message);
+    throw err;
+  }
 };
 
-export const downloadReport = async (reportId, fileId) => {
-  const res = await API.get(`/api/upload/files/${reportId}/${fileId}/download`, {
-    responseType: 'blob',
-  });
+// Delete report
+export const deleteReport = async (reportId) => {
+  const res = await API.delete(`api/reports/${reportId}`);
   return res.data;
 };
 
-export const viewReport = async (reportId, fileId) => {
-  const res = await API.get(`/api/upload/files/${reportId}/${fileId}/view`, {
-    responseType: 'blob',
-  });
-  return res.data;
-};
 
-export const deleteReport = async (reportId, fileId) => {
-  const res = await API.delete(`/api/upload/files/${reportId}/${fileId}`);
-  return res.data;
-};
-
-// ✅ Medications APIs
+// Medications APIs
 export const getMedications = async () => {
   const res = await API.get("/api/medications");
   return res.data.medications || [];
@@ -124,7 +119,7 @@ export const getMedicationAdherence = async () => {
   return res.data.adherence || res.data;
 };
 
-// ✅ Appointments APIs
+// Appointments APIs
 export const getAppointments = async () => {
   const res = await API.get("/api/appointments");
   return res.data.appointments || [];
