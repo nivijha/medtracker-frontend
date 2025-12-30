@@ -48,7 +48,7 @@ export const getCurrentUser = async () => {
 
 // Get logged-in user's reports
 export const getReports = async () => {
-  const res = await API.get("api/reports/my");
+  const res = await API.get("/api/reports/my");
   return res.data;
 };
 
@@ -67,7 +67,7 @@ export const uploadReport = async (formData) => {
 
 // Delete report
 export const deleteReport = async (reportId) => {
-  const res = await API.delete(`api/reports/${reportId}`);
+  const res = await API.delete(`/api/reports/${reportId}`);
   return res.data;
 };
 
@@ -148,16 +148,6 @@ export const cancelAppointment = async (id) => {
 export const deleteAppointment = async (id) => {
   const res = await API.delete(`/api/appointments/${id}`);
   return res.data;
-};
-
-export const getUpcomingAppointments = async () => {
-  const res = await API.get("/api/appointments/upcoming");
-  return res.data;
-};
-
-export const getPastAppointments = async () => {
-  const res = await API.get("/api/appointments/past");
-  return res.data.appointments || [];
 };
 
 export const getAvailableSlots = async (doctorId, date) => {

@@ -1,156 +1,153 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Calendar as CalendarIcon, Clock, User, Plus, Search, Filter, Loader2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Calendar as CalendarIcon, Clock, Plus, Search, Loader2 } from "lucide-react";
 import {
   getAppointments,
   createAppointment,
-  updateAppointment,
   cancelAppointment,
   deleteAppointment,
-  getUpcomingAppointments,
-  getPastAppointments,
-  getAvailableSlots,
-  getDoctors,
-  rescheduleAppointment
+  rescheduleAppointment,
 } from "@/lib/utils";
 
 export default function AppointmentsPage() {
   const [activeTab, setActiveTab] = useState("upcoming");
-  const [upcomingAppointments, setUpcomingAppointments] = useState([]);
-  const [pastAppointments, setPastAppointments] = useState([]);
-  const [doctors, setDoctors] = useState([]);
-  const [availableSlots, setAvailableSlots] = useState([]);
+  const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+
   const [showAddModal, setShowAddModal] = useState(false);
   const [showRescheduleModal, setShowRescheduleModal] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
-  const [selectedDate, setSelectedDate] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+
   const [formData, setFormData] = useState({
-    doctorId: "",
+    doctorName: "",
+    specialty: "",
+    hospital: "",
     date: "",
     time: "",
-    location: "",
-    notes: ""
+    notes: "",
   });
 
+  /* ---------------- FETCH ---------------- */
   useEffect(() => {
     fetchAppointments();
-    fetchDoctors();
   }, []);
 
   const fetchAppointments = async () => {
     try {
       setLoading(true);
-      const upcoming = await getUpcomingAppointments();
-      const past = await getPastAppointments();
-      setUpcomingAppointments(upcoming || []);
-      setPastAppointments(past || []);
-    } catch (error) {
-      console.error("Error fetching appointments:", error);
+      const res = await getAppointments();
+      setAppointments(res);
+    } catch {
+      alert("Failed to load appointments");
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchDoctors = async () => {
-    try {
-      const doctorsList = await getDoctors();
-      setDoctors(doctorsList || []);
-    } catch (error) {
-      console.error("Error fetching doctors:", error);
-    }
-  };
+  /* ---------------- HELPERS ---------------- */
+  const getDateTime = (apt) =>
+    apt.appointmentDateTime ? new Date(apt.appointmentDateTime) : null;
 
-  const fetchAvailableSlots = async (doctorId, date) => {
-    try {
-      const slots = await getAvailableSlots(doctorId, date);
-      setAvailableSlots(slots || []);
-    } catch (error) {
-      console.error("Error fetching available slots:", error);
-    }
-  };
+  const now = new Date();
 
+  const upcoming = appointments.filter(
+    (a) => getDateTime(a) && getDateTime(a) >= now && a.status !== "cancelled"
+  );
+
+  const past = appointments.filter(
+    (a) => !getDateTime(a) || getDateTime(a) < now || a.status === "cancelled"
+  );
+
+  const filtered = (activeTab === "upcoming" ? upcoming : past).filter(
+    (a) =>
+      a.doctorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (a.specialty || "").toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const resetForm = () =>
+    setFormData({
+      doctorName: "",
+      specialty: "",
+      hospital: "",
+      date: "",
+      time: "",
+      notes: "",
+    });
+
+  /* ---------------- ADD ---------------- */
   const handleAddAppointment = async (e) => {
     e.preventDefault();
+
+    if (!formData.doctorName.trim()) return alert("Doctor name is required");
+    if (!formData.date) return alert("Please select a date");
+    if (!formData.time) return alert("Please select a time");
+
     try {
+      setIsSaving(true);
       await createAppointment(formData);
       setShowAddModal(false);
-      setFormData({
-        doctorId: "",
-        date: "",
-        time: "",
-        location: "",
-        notes: ""
-      });
+      resetForm();
       fetchAppointments();
-    } catch (error) {
-      console.error("Error adding appointment:", error);
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to save appointment");
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const handleCancelAppointment = async (appointmentId) => {
-    if (window.confirm("Are you sure you want to cancel this appointment?")) {
-      try {
-        await cancelAppointment(appointmentId);
-        fetchAppointments();
-      } catch (error) {
-        console.error("Error cancelling appointment:", error);
-      }
-    }
-  };
-
-  const handleDeleteAppointment = async (appointmentId) => {
-    if (window.confirm("Are you sure you want to delete this appointment?")) {
-      try {
-        await deleteAppointment(appointmentId);
-        fetchAppointments();
-      } catch (error) {
-        console.error("Error deleting appointment:", error);
-      }
-    }
-  };
-
-  const handleRescheduleAppointment = async (appointment) => {
-    setSelectedAppointment(appointment);
+  /* ---------------- RESCHEDULE ---------------- */
+  const handleReschedule = (apt) => {
+    const dt = new Date(apt.appointmentDateTime);
+    setSelectedAppointment(apt);
+    setFormData({
+      ...formData,
+      date: dt.toISOString().split("T")[0],
+      time: dt.toTimeString().slice(0, 5),
+    });
     setShowRescheduleModal(true);
-    setSelectedDate(appointment.date);
-    await fetchAvailableSlots(appointment.doctorId, appointment.date);
   };
 
-  const handleConfirmReschedule = async () => {
+  const confirmReschedule = async () => {
+    if (!formData.date || !formData.time)
+      return alert("Date and time required");
+
     try {
+      setIsSaving(true);
       await rescheduleAppointment(selectedAppointment._id, {
-        date: selectedDate,
-        time: formData.time
+        date: formData.date,
+        time: formData.time,
       });
       setShowRescheduleModal(false);
       setSelectedAppointment(null);
-      setFormData({ ...formData, time: "" });
       fetchAppointments();
-    } catch (error) {
-      console.error("Error rescheduling appointment:", error);
+    } catch {
+      alert("Failed to reschedule");
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const filteredUpcomingAppointments = upcomingAppointments.filter(apt =>
-    apt.doctor.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    apt.specialty.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  /* ---------------- CANCEL / DELETE ---------------- */
+  const handleCancel = async (id) => {
+    if (!confirm("Cancel this appointment?")) return;
+    await cancelAppointment(id);
+    fetchAppointments();
+  };
 
-  const filteredPastAppointments = pastAppointments.filter(apt =>
-    apt.doctor.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    apt.specialty.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const handleDelete = async (id) => {
+    if (!confirm("Delete this appointment permanently?")) return;
+    await deleteAppointment(id);
+    fetchAppointments();
+  };
 
+  /* ---------------- UI ---------------- */
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-3" />
-          <p className="text-gray-600 font-medium">Loading appointments...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
       </div>
     );
   }
@@ -158,340 +155,181 @@ export default function AppointmentsPage() {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+
+        {/* HEADER */}
+        <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Appointments</h1>
-            <p className="text-gray-600 mt-1">Manage your medical appointments</p>
+            <h1 className="text-3xl font-bold">Appointments</h1>
+            <p className="text-gray-600">Manage your appointments</p>
           </div>
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg"
           >
-            <Plus className="w-5 h-5" />
-            Book New Appointment
+            <Plus className="w-4 h-4" /> Add Appointment
           </button>
         </div>
 
-        {/* Search and Filter */}
-        <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6 shadow-sm">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Search appointments..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-              <Filter className="w-5 h-5" />
-              Filter
-            </button>
-          </div>
+        {/* SEARCH */}
+        <div className="mb-6 relative">
+          <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
+          <input
+            placeholder="Search doctor or specialty..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 py-2 border rounded-lg"
+          />
         </div>
 
-        {/* Tabs */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm mb-6">
-          <div className="flex border-b border-gray-200">
-            <button
-              className={`flex-1 py-3 px-4 text-center font-medium transition-colors ${
-                activeTab === "upcoming"
-                  ? "text-blue-600 border-b-2 border-blue-600"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-              onClick={() => setActiveTab("upcoming")}
-            >
-              Upcoming ({upcomingAppointments.length})
-            </button>
-            <button
-              className={`flex-1 py-3 px-4 text-center font-medium transition-colors ${
-                activeTab === "past"
-                  ? "text-blue-600 border-b-2 border-blue-600"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-              onClick={() => setActiveTab("past")}
-            >
-              Past ({pastAppointments.length})
-            </button>
+        {/* TABS */}
+        <div className="bg-white rounded-xl shadow">
+          <div className="flex border-b">
+            {["upcoming", "past"].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`flex-1 py-3 ${
+                  activeTab === tab
+                    ? "border-b-2 border-blue-600 text-blue-600"
+                    : "text-gray-500"
+                }`}
+              >
+                {tab.toUpperCase()}
+              </button>
+            ))}
           </div>
 
-          {/* Appointments List */}
-          <div className="p-4">
-            {activeTab === "upcoming" ? (
-              <div className="space-y-4">
-                {filteredUpcomingAppointments.map((appointment) => (
-                  <div key={appointment.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                    <div className="flex items-start justify-between">
-                      <div className="flex gap-4">
-                        <div className="p-3 bg-blue-50 rounded-lg">
-                          <CalendarIcon className="w-6 h-6 text-blue-600" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900">{appointment.doctor}</h3>
-                          <p className="text-sm text-gray-600">{appointment.specialty}</p>
-                          <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                            <div className="flex items-center gap-1">
-                              <CalendarIcon className="w-4 h-4" />
-                              {appointment.date}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Clock className="w-4 h-4" />
-                              {appointment.time}
-                            </div>
-                          </div>
-                          <p className="text-sm text-gray-500 mt-1">{appointment.location}</p>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                          {appointment.status}
-                        </span>
-                        <div className="flex flex-col items-end gap-2">
-                          <button
-                            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-                            onClick={() => console.log('View details', appointment)}
-                          >
-                            View Details
-                          </button>
-                          <div className="flex gap-2">
-                            <button
-                              className="text-sm text-yellow-600 hover:text-yellow-700 font-medium"
-                              onClick={() => handleRescheduleAppointment(appointment)}
-                            >
-                              Reschedule
-                            </button>
-                            <button
-                              className="text-sm text-red-600 hover:text-red-700 font-medium"
-                              onClick={() => handleCancelAppointment(appointment._id)}
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+          <div className="p-4 space-y-4">
+            {filtered.map((apt) => {
+              const dt = new Date(apt.appointmentDateTime);
+              return (
+                <div key={apt._id} className="border rounded-lg p-4 flex justify-between">
+                  <div>
+                    <h3 className="font-semibold">{apt.doctorName}</h3>
+                    <p className="text-sm text-gray-600">
+                      {apt.specialty || "General Consultation"}
+                    </p>
+                    <p className="text-sm text-gray-500">{apt.hospital}</p>
+
+                    <div className="flex gap-4 text-sm mt-2 text-gray-500">
+                      <span className="flex items-center gap-1">
+                        <CalendarIcon className="w-4 h-4" />
+                        {dt.toLocaleDateString("en-IN")}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-4 h-4" />
+                        {dt.toLocaleTimeString("en-IN", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true,
+                        })}
+                      </span>
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {filteredPastAppointments.map((appointment) => (
-                  <div key={appointment.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow opacity-75">
-                    <div className="flex items-start justify-between">
-                      <div className="flex gap-4">
-                        <div className="p-3 bg-gray-50 rounded-lg">
-                          <CalendarIcon className="w-6 h-6 text-gray-600" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900">{appointment.doctor}</h3>
-                          <p className="text-sm text-gray-600">{appointment.specialty}</p>
-                          <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                            <div className="flex items-center gap-1">
-                              <CalendarIcon className="w-4 h-4" />
-                              {appointment.date}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Clock className="w-4 h-4" />
-                              {appointment.time}
-                            </div>
-                          </div>
-                          <p className="text-sm text-gray-500 mt-1">{appointment.location}</p>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
-                          {appointment.status}
-                        </span>
-                        <div className="flex flex-col items-end gap-2">
-                          <button
-                            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-                            onClick={() => console.log('View summary', appointment)}
-                          >
-                            View Summary
-                          </button>
-                          <button
-                            className="text-sm text-red-600 hover:text-red-700 font-medium"
-                            onClick={() => handleDeleteAppointment(appointment._id)}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+
+                  <div className="flex flex-col gap-2 text-right">
+                    {activeTab === "upcoming" ? (
+                      <>
+                        <button
+                          onClick={() => handleReschedule(apt)}
+                          className="text-blue-600 text-sm"
+                        >
+                          Reschedule
+                        </button>
+                        <button
+                          onClick={() => handleCancel(apt._id)}
+                          className="text-yellow-600 text-sm"
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => handleDelete(apt._id)}
+                        className="text-red-600 text-sm"
+                      >
+                        Delete
+                      </button>
+                    )}
                   </div>
-                ))}
-              </div>
-            )}
+                </div>
+              );
+            })}
           </div>
         </div>
-
-        {/* Add Appointment Modal */}
-        {showAddModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Book New Appointment</h2>
-              <form onSubmit={handleAddAppointment} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Doctor</label>
-                  <select
-                    required
-                    value={formData.doctorId}
-                    onChange={(e) => {
-                      setFormData({...formData, doctorId: e.target.value});
-                      if (e.target.value && formData.date) {
-                        fetchAvailableSlots(e.target.value, formData.date);
-                      }
-                    }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Select a doctor</option>
-                    {doctors.map(doctor => (
-                      <option key={doctor._id} value={doctor._id}>
-                        Dr. {doctor.name} - {doctor.specialty}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                  <input
-                    type="date"
-                    required
-                    value={formData.date}
-                    onChange={(e) => {
-                      setFormData({...formData, date: e.target.value});
-                      if (formData.doctorId) {
-                        fetchAvailableSlots(formData.doctorId, e.target.value);
-                      }
-                    }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
-                  <select
-                    required
-                    value={formData.time}
-                    onChange={(e) => setFormData({...formData, time: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Select a time slot</option>
-                    {availableSlots.map((slot, index) => (
-                      <option key={index} value={slot}>
-                        {slot}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.location}
-                    onChange={(e) => setFormData({...formData, location: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                  <textarea
-                    value={formData.notes}
-                    onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowAddModal(false)}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    Book Appointment
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Reschedule Appointment Modal */}
-        {showRescheduleModal && selectedAppointment && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Reschedule Appointment</h2>
-              <div className="space-y-4">
-                <div>
-                  <p className="text-sm text-gray-600 mb-2">
-                    Appointment with Dr. {selectedAppointment.doctor}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Currently scheduled for {selectedAppointment.date} at {selectedAppointment.time}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">New Date</label>
-                  <input
-                    type="date"
-                    required
-                    value={selectedDate}
-                    onChange={(e) => {
-                      setSelectedDate(e.target.value);
-                      fetchAvailableSlots(selectedAppointment.doctorId, e.target.value);
-                    }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">New Time</label>
-                  <select
-                    required
-                    value={formData.time}
-                    onChange={(e) => setFormData({...formData, time: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Select a time slot</option>
-                    {availableSlots.map((slot, index) => (
-                      <option key={index} value={slot}>
-                        {slot}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowRescheduleModal(false);
-                      setSelectedAppointment(null);
-                      setFormData({...formData, time: ""});
-                    }}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleConfirmReschedule}
-                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    Reschedule
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* ADD MODAL */}
+      {showAddModal && (
+        <Modal
+          title="Book Appointment"
+          onClose={() => setShowAddModal(false)}
+          onSubmit={handleAddAppointment}
+          formData={formData}
+          setFormData={setFormData}
+          isSaving={isSaving}
+        />
+      )}
+
+      {/* RESCHEDULE MODAL */}
+      {showRescheduleModal && (
+        <Modal
+          title="Reschedule Appointment"
+          onClose={() => setShowRescheduleModal(false)}
+          onSubmit={confirmReschedule}
+          formData={formData}
+          setFormData={setFormData}
+          isSaving={isSaving}
+        />
+      )}
+    </div>
+  );
+}
+
+/* ---------------- MODAL ---------------- */
+function Modal({ title, onClose, onSubmit, formData, setFormData, isSaving }) {
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-xl w-full max-w-md">
+        <h2 className="text-xl font-semibold mb-4">{title}</h2>
+
+        <Input label="Doctor Name" field="doctorName" formData={formData} setFormData={setFormData} />
+        <Input label="Specialty" field="specialty" formData={formData} setFormData={setFormData} />
+        <Input label="Hospital / Clinic" field="hospital" formData={formData} setFormData={setFormData} />
+        <Input label="Date" type="date" field="date" formData={formData} setFormData={setFormData} />
+        <Input label="Time" type="time" field="time" formData={formData} setFormData={setFormData} />
+
+        <div className="flex gap-3 mt-4">
+          <button disabled={isSaving} onClick={onClose} className="flex-1 border rounded-lg py-2">
+            Cancel
+          </button>
+          <button
+            disabled={isSaving}
+            onClick={onSubmit}
+            className={`flex-1 rounded-lg py-2 flex items-center justify-center gap-2 ${
+              isSaving
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-blue-600 text-white hover:bg-blue-700"
+            }`}
+          >
+            {isSaving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</> : "Save"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Input({ label, field, formData, setFormData, type = "text" }) {
+  return (
+    <div className="mb-3">
+      <label className="text-sm text-gray-600">{label}</label>
+      <input
+        type={type}
+        value={formData[field]}
+        onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
+        className="w-full border rounded-lg px-3 py-2"
+      />
     </div>
   );
 }

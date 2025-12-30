@@ -8,93 +8,42 @@ import {
   Download,
   Eye,
   Calendar,
-  Clock,
   ChevronDown,
   X,
-  AlertCircle,
-  CheckCircle,
   Loader2,
   Upload,
 } from "lucide-react";
-import {
-  getReports,
-  uploadReport,
-  deleteReport,
-} from "@/lib/utils";
-
-const StatusBadge = ({ status }) => {
-  const styles = {
-    completed: "bg-green-100 text-green-700 border-green-200",
-    pending: "bg-yellow-100 text-yellow-700 border-yellow-200",
-    reviewed: "bg-blue-100 text-blue-700 border-blue-200",
-  };
-
-  const icons = {
-    completed: CheckCircle,
-    pending: Clock,
-    reviewed: Eye,
-  };
-
-  const Icon = icons[status] || AlertCircle;
-
-  return (
-    <span
-      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${
-        styles[status] || styles.pending
-      }`}
-    >
-      <Icon className="w-3 h-3" />
-      {status || "pending"}
-    </span>
-  );
-};
+import { getReports, uploadReport, deleteReport } from "@/lib/utils";
 
 const ReportCard = ({ report, onView, onDownload, onDelete }) => {
   return (
     <div className="p-5 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all group">
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-start gap-3 flex-1">
-          <div className="p-2.5 bg-blue-50 rounded-lg group-hover:bg-blue-100 transition-colors">
-            <FileText className="w-5 h-5 text-blue-600" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
-              {report.description || report.type}
-            </h3>
-            <p className="text-sm text-gray-600 line-clamp-2">
-              {report.fileDescription ||
-                report.description ||
-                "No description available"}
-            </p>
-          </div>
+      <div className="flex items-start gap-3 mb-3">
+        <div className="p-2.5 bg-blue-50 rounded-lg group-hover:bg-blue-100 transition-colors">
+          <FileText className="w-5 h-5 text-blue-600" />
         </div>
-        <StatusBadge status={report.status} />
+
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-gray-900 mb-1">
+            {report.description || report.type || "Medical Report"}
+          </h3>
+          <p className="text-sm text-gray-600 line-clamp-2">
+            {report.fileDescription || "No description available"}
+          </p>
+        </div>
       </div>
 
       <div className="flex items-center gap-4 text-xs text-gray-500 mb-4">
         {report.reportDate && (
           <span className="flex items-center gap-1">
             <Calendar className="w-3.5 h-3.5" />
-            {new Date(report.reportDate).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })}
+            {new Date(report.reportDate).toLocaleDateString()}
           </span>
         )}
-        {report.doctorName && (
-          <span className="flex items-center gap-1">
-            Dr. {report.doctorName}
-          </span>
-        )}
+        {report.doctorName && <span>Dr. {report.doctorName}</span>}
         {report.reportType && (
           <span className="px-2 py-0.5 bg-gray-100 rounded-full">
             {report.reportType}
-          </span>
-        )}
-        {report.size && (
-          <span className="flex items-center gap-1">
-            {(report.size / 1024 / 1024).toFixed(2)} MB
           </span>
         )}
       </div>
@@ -102,25 +51,25 @@ const ReportCard = ({ report, onView, onDownload, onDelete }) => {
       <div className="flex items-center gap-2">
         <button
           onClick={() => onView(report)}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
           <Eye className="w-4 h-4" />
-          View Report
+          View
         </button>
+
         <button
           onClick={() => onDownload(report)}
-          className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+          className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
         >
           <Download className="w-4 h-4" />
         </button>
-        {onDelete && (
-          <button
-            onClick={() => onDelete(report)}
-            className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        )}
+
+        <button
+          onClick={() => onDelete(report)}
+          className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200"
+        >
+          <X className="w-4 h-4" />
+        </button>
       </div>
     </div>
   );
@@ -200,12 +149,48 @@ const FilterDropdown = ({ isOpen, onClose, filters, onFilterChange }) => {
   );
 };
 
+const DeleteConfirmModal = ({ isOpen, onClose, onConfirm }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div className="bg-white rounded-xl w-full max-w-sm p-6 shadow-lg animate-scaleIn">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          Delete Report
+        </h3>
+        <p className="text-sm text-gray-600 mb-6">
+          Are you sure you want to delete this report? This action cannot be
+          undone.
+        </p>
+
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function EnhancedReportsPage() {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [reportToDelete, setReportToDelete] = useState(null);
+
   const [uploading, setUploading] = useState(false);
   const [filters, setFilters] = useState({
     status: "all",
@@ -272,16 +257,23 @@ export default function EnhancedReportsPage() {
     document.body.removeChild(a);
   };
 
-  const handleDelete = async (report) => {
-    if (window.confirm("Are you sure you want to delete this report?")) {
-      try {
-        // The backend expects reportId and fileId
-        // reportId is the report._id and fileId is the document._id
-        await deleteReport(report._id);
-        fetchReports();
-      } catch (error) {
-        console.error("Error deleting report:", error);
-      }
+  const handleDeleteClick = (report) => {
+    setReportToDelete(report);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      // Instant UI removal
+      setReports((prev) => prev.filter((r) => r._id !== reportToDelete._id));
+
+      await deleteReport(reportToDelete._id);
+    } catch (error) {
+      console.error("Delete failed:", error);
+      fetchReports(); // rollback if needed
+    } finally {
+      setShowDeleteModal(false);
+      setReportToDelete(null);
     }
   };
 
@@ -426,7 +418,7 @@ export default function EnhancedReportsPage() {
                 report={report}
                 onView={handleView}
                 onDownload={handleDownload}
-                onDelete={handleDelete}
+                onDelete={handleDeleteClick}
               />
             ))}
           </div>
@@ -577,6 +569,14 @@ export default function EnhancedReportsPage() {
           </div>
         )}
       </div>
+      <DeleteConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setReportToDelete(null);
+        }}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

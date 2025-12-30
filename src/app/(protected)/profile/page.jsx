@@ -23,7 +23,6 @@ import {
 import {
   getUserProfile,
   updateUserProfile,
-  updateUserPreferences,
   getHealthSummary
 } from "@/lib/utils";
 
