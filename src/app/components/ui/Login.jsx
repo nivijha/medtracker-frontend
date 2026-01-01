@@ -65,7 +65,13 @@ export default function Login() {
       router.push("/dashboard");
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.message || "Something went wrong");
+      const apiError = err.response?.data;
+
+      if (apiError?.errors?.length) {
+        setError(apiError.errors.join(" • "));
+      } else {
+        setError(apiError?.message || "Something went wrong");
+      }
     } finally {
       setLoading(false);
     }
@@ -223,12 +229,12 @@ export default function Login() {
                     required
                   />
                   <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPassword ? <EyeOff /> : <Eye />}
-                </button>
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPassword ? <EyeOff /> : <Eye />}
+                  </button>
                 </div>
               </div>
             )}
