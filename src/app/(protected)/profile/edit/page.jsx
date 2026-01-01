@@ -95,15 +95,11 @@ export default function EditProfilePage() {
     passwords.new && passwords.confirm && passwords.new !== passwords.confirm;
 
   const sameAsCurrent =
-    passwords.current &&
-    passwords.new &&
-    passwords.current === passwords.new;
+    passwords.current && passwords.new && passwords.current === passwords.new;
 
-  const passwordTooShort =
-    passwords.new && passwords.new.length < 6;
+  const passwordTooShort = passwords.new && passwords.new.length < 6;
 
-  const passwordInvalid =
-    passwordMismatch || sameAsCurrent || passwordTooShort;
+  const passwordInvalid = passwordMismatch || sameAsCurrent || passwordTooShort;
 
   const isProfileChanged = () =>
     form.name || form.email || form.phone || form.address || form.profileImage;
@@ -117,8 +113,16 @@ export default function EditProfilePage() {
     try {
       setSaving(true);
 
-      await updateProfile(form);
+      // ✅ 1. Update profile
+      const res = await updateProfile(form);
 
+      // ✅ 2. Update localStorage user (THIS FIXES NAVBAR IMAGE)
+      localStorage.setItem("user", JSON.stringify(res.user));
+
+      // ✅ 3. Notify navbar to re-read user
+      window.dispatchEvent(new Event("storage"));
+
+      // ✅ 4. Update password if needed
       if (passwordTouched) {
         if (passwordInvalid) return;
 
@@ -188,10 +192,30 @@ export default function EditProfilePage() {
         </div>
 
         {/* PROFILE INFO */}
-        <Input label="Full Name" icon={User} value={form.name} onChange={(v) => updateField("name", v)} />
-        <Input label="Email" icon={Mail} value={form.email} onChange={(v) => updateField("email", v)} />
-        <Input label="Phone" icon={Phone} value={form.phone} onChange={(v) => updateField("phone", v)} />
-        <Input label="Address" icon={MapPin} value={form.address} onChange={(v) => updateField("address", v)} />
+        <Input
+          label="Full Name"
+          icon={User}
+          value={form.name}
+          onChange={(v) => updateField("name", v)}
+        />
+        <Input
+          label="Email"
+          icon={Mail}
+          value={form.email}
+          onChange={(v) => updateField("email", v)}
+        />
+        <Input
+          label="Phone"
+          icon={Phone}
+          value={form.phone}
+          onChange={(v) => updateField("phone", v)}
+        />
+        <Input
+          label="Address"
+          icon={MapPin}
+          value={form.address}
+          onChange={(v) => updateField("address", v)}
+        />
 
         {/* PASSWORD */}
         <div className="pt-6 border-t space-y-3">
@@ -199,13 +223,35 @@ export default function EditProfilePage() {
             <Lock className="w-5 h-5" /> Change Password
           </h2>
 
-          <PasswordInput placeholder="Current password" value={passwords.current} onChange={(v) => setPasswords(p => ({ ...p, current: v }))} show={showPassword} toggle={() => setShowPassword(!showPassword)} />
-          <PasswordInput placeholder="New password" value={passwords.new} onChange={(v) => setPasswords(p => ({ ...p, new: v }))} show={showPassword} toggle={() => setShowPassword(!showPassword)} />
-          <PasswordInput placeholder="Confirm new password" value={passwords.confirm} onChange={(v) => setPasswords(p => ({ ...p, confirm: v }))} show={showPassword} toggle={() => setShowPassword(!showPassword)} />
+          <PasswordInput
+            placeholder="Current password"
+            value={passwords.current}
+            onChange={(v) => setPasswords((p) => ({ ...p, current: v }))}
+            show={showPassword}
+            toggle={() => setShowPassword(!showPassword)}
+          />
+          <PasswordInput
+            placeholder="New password"
+            value={passwords.new}
+            onChange={(v) => setPasswords((p) => ({ ...p, new: v }))}
+            show={showPassword}
+            toggle={() => setShowPassword(!showPassword)}
+          />
+          <PasswordInput
+            placeholder="Confirm new password"
+            value={passwords.confirm}
+            onChange={(v) => setPasswords((p) => ({ ...p, confirm: v }))}
+            show={showPassword}
+            toggle={() => setShowPassword(!showPassword)}
+          />
 
           {passwordMismatch && <InlineError message="Passwords do not match" />}
-          {sameAsCurrent && <InlineError message="New password must be different" />}
-          {passwordTooShort && <InlineError message="Password must be at least 6 characters" />}
+          {sameAsCurrent && (
+            <InlineError message="New password must be different" />
+          )}
+          {passwordTooShort && (
+            <InlineError message="Password must be at least 6 characters" />
+          )}
           {passwordError && <InlineError message={passwordError} />}
           {passwordSuccess && (
             <div className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded-lg text-sm">
@@ -217,7 +263,10 @@ export default function EditProfilePage() {
 
         {/* ACTIONS */}
         <div className="flex justify-end gap-3 pt-4">
-          <button onClick={() => router.push("/profile")} className="border px-4 py-2 rounded-lg flex gap-2">
+          <button
+            onClick={() => router.push("/profile")}
+            className="border px-4 py-2 rounded-lg flex gap-2"
+          >
             <X className="w-4 h-4" /> Cancel
           </button>
 
@@ -251,15 +300,29 @@ const Input = ({ label, icon: Icon, value, onChange }) => (
     <label className="text-sm text-gray-600">{label}</label>
     <div className="relative">
       <Icon className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
-      <input value={value} onChange={(e) => onChange(e.target.value)} className="w-full pl-10 py-2 border rounded-lg" />
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full pl-10 py-2 border rounded-lg"
+      />
     </div>
   </div>
 );
 
 const PasswordInput = ({ placeholder, value, onChange, show, toggle }) => (
   <div className="relative">
-    <input type={show ? "text" : "password"} placeholder={placeholder} value={value} onChange={(e) => onChange(e.target.value)} className="w-full pr-10 px-3 py-2 border rounded-lg" />
-    <button type="button" onClick={toggle} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+    <input
+      type={show ? "text" : "password"}
+      placeholder={placeholder}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="w-full pr-10 px-3 py-2 border rounded-lg"
+    />
+    <button
+      type="button"
+      onClick={toggle}
+      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+    >
       {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
     </button>
   </div>
