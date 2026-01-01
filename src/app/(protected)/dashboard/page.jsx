@@ -37,7 +37,6 @@ const ActivityItem = ({ title, time, status }) => {
 
   return (
     <div className="flex items-center justify-between gap-4 px-4 py-3 rounded-lg hover:bg-gray-50 transition">
-      {/* Left */}
       <div className="flex items-start gap-3 min-w-0">
         <div className="p-2 bg-gray-100 rounded-lg">
           <Clock className="w-4 h-4 text-gray-600" />
@@ -59,7 +58,6 @@ const ActivityItem = ({ title, time, status }) => {
         </div>
       </div>
 
-      {/* Right */}
       <span
         className={`shrink-0 px-3 py-1 text-xs font-medium rounded-full capitalize ${
           statusStyles[status] || "bg-gray-100 text-gray-700"
@@ -77,7 +75,8 @@ export default function DashboardPage() {
   const router = useRouter();
 
   const [loading, setLoading] = useState(true);
-  const [userName] = useState("User");
+  const [userName, setUserName] = useState("User");
+  const [isNewUser, setIsNewUser] = useState(false);
 
   const [appointments, setAppointments] = useState([]);
   const [reports, setReports] = useState([]);
@@ -99,6 +98,22 @@ export default function DashboardPage() {
       setAppointments(apts || []);
       setReports(reps || []);
       setMedications(meds || []);
+
+      /* -------- Detect new vs existing user (FRONTEND ONLY) -------- */
+
+      const noDataYet =
+        (!apts || apts.length === 0) &&
+        (!reps || reps.length === 0) &&
+        (!meds || meds.length === 0);
+
+      setIsNewUser(noDataYet);
+
+      /* -------- Get user name from localStorage -------- */
+
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      if (storedUser?.name) {
+        setUserName(storedUser.name.split(" ")[0]);
+      }
 
       /* ---------------- BUILD ACTIVITY ---------------- */
 
@@ -131,8 +146,6 @@ export default function DashboardPage() {
           status: m.status === "active" ? "pending" : "completed",
         });
       });
-
-      /* ---------------- SORT (LATEST FIRST) ---------------- */
 
       const sortedActivity = activity
         .filter((a) => a.time)
@@ -168,10 +181,15 @@ export default function DashboardPage() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
-              Welcome back, {userName}
+              {isNewUser
+                ? `Welcome, ${userName}`
+                : `Welcome back, ${userName}`}
             </h1>
-            <p className="text-gray-600">Overview of your health activity</p>
+            <p className="text-gray-600">
+              Overview of your health activity
+            </p>
           </div>
+
           <button
             onClick={() => router.push("/profile")}
             className="p-3 bg-white border rounded-xl hover:shadow"
