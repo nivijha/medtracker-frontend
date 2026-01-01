@@ -3,11 +3,8 @@
 import React, { useState, useEffect } from "react";
 import {
   Pill,
-  Clock,
-  AlertCircle,
   Plus,
   Search,
-  Calendar as CalendarIcon,
   CheckCircle,
   Loader2,
 } from "lucide-react";
@@ -45,119 +42,50 @@ export default function MedicationsPage() {
     fetchMedicationSchedule();
   }, []);
 
-  /* ---------------- FETCH ---------------- */
-
   const fetchMedications = async () => {
     try {
       setLoading(true);
       const data = await getMedications();
-
-      setCurrentMedications(
-        data.filter((med) => med.status === "active")
-      );
-
+      setCurrentMedications(data.filter((m) => m.status === "active"));
       setPastMedications(
-        data.filter(
-          (med) =>
-            med.status === "completed" ||
-            med.status === "discontinued"
-        )
+        data.filter((m) => m.status !== "active")
       );
-    } catch (err) {
-      console.error("Error fetching medications:", err);
     } finally {
       setLoading(false);
     }
   };
 
   const fetchMedicationSchedule = async () => {
-    try {
-      const schedule = await getMedicationSchedule();
-      setMedicationSchedule(schedule || []);
-    } catch (err) {
-      console.error("Error fetching medication schedule:", err);
-    }
+    const schedule = await getMedicationSchedule();
+    setMedicationSchedule(schedule || []);
   };
-
-  /* ---------------- ACTIONS ---------------- */
 
   const handleAddMedication = async (e) => {
     e.preventDefault();
-    try {
-      await createMedication(formData);
-      setShowAddModal(false);
-      setFormData({
-        name: "",
-        dosage: "",
-        frequency: "",
-        time: "",
-        prescribedBy: "",
-        startDate: "",
-        nextRefill: "",
-        notes: "",
-      });
-      fetchMedications();
-      fetchMedicationSchedule();
-    } catch (err) {
-      console.error("Error adding medication:", err);
-    }
-  };
-
-  const handleMarkAsTaken = async (id) => {
-    try {
-      await markMedicationAsTaken(id);
-      fetchMedicationSchedule();
-    } catch (err) {
-      console.error("Error marking as taken:", err);
-    }
-  };
-
-  const handleRequestRefill = async (id) => {
-    try {
-      await processRefill(id);
-      fetchMedications();
-    } catch (err) {
-      console.error("Error processing refill:", err);
-    }
+    await createMedication(formData);
+    setShowAddModal(false);
+    setFormData({
+      name: "",
+      dosage: "",
+      frequency: "",
+      time: "",
+      prescribedBy: "",
+      startDate: "",
+      nextRefill: "",
+      notes: "",
+    });
+    fetchMedications();
+    fetchMedicationSchedule();
   };
 
   const handleDeleteMedication = async (id) => {
-    if (!window.confirm("Delete this medication?")) return;
-    try {
-      await deleteMedication(id);
-      fetchMedications();
-    } catch (err) {
-      console.error("Error deleting medication:", err);
-    }
-  };
-
-  /* ---------------- HELPERS ---------------- */
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "active":
-        return "bg-green-100 text-green-700";
-      case "completed":
-        return "bg-gray-100 text-gray-700";
-      case "discontinued":
-        return "bg-red-100 text-red-700";
-      default:
-        return "bg-gray-100 text-gray-700";
-    }
+    if (!confirm("Delete this medication?")) return;
+    await deleteMedication(id);
+    fetchMedications();
   };
 
   const formatDate = (date) =>
     date ? new Date(date).toLocaleDateString() : "N/A";
-
-  const filteredCurrent = currentMedications.filter((m) =>
-    m.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const filteredPast = pastMedications.filter((m) =>
-    m.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  /* ---------------- LOADING ---------------- */
 
   if (loading) {
     return (
@@ -167,31 +95,32 @@ export default function MedicationsPage() {
     );
   }
 
-  /* ---------------- UI ---------------- */
-
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gray-50 px-4 sm:px-6 py-6">
+      <div className="max-w-6xl mx-auto space-y-6">
 
-        {/* Header */}
-        <div className="flex justify-between items-center mb-6">
+        {/* HEADER */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Medications</h1>
-            <p className="text-gray-600 mt-1">
+            <h1 className="text-2xl sm:text-3xl font-bold">
+              Medications
+            </h1>
+            <p className="text-gray-600 text-sm sm:text-base">
               Manage your prescriptions and daily schedule
             </p>
           </div>
+
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
             <Plus className="w-5 h-5" />
             Add Medication
           </button>
         </div>
 
-        {/* Search */}
-        <div className="bg-white p-4 rounded-xl border mb-6">
+        {/* SEARCH */}
+        <div className="bg-white p-4 rounded-xl border">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
@@ -203,9 +132,9 @@ export default function MedicationsPage() {
           </div>
         </div>
 
-        {/* Tabs */}
+        {/* TABS */}
         <div className="bg-white rounded-xl border">
-          <div className="flex border-b">
+          <div className="flex border-b text-sm sm:text-base">
             {["current", "past"].map((tab) => (
               <button
                 key={tab}
@@ -223,16 +152,22 @@ export default function MedicationsPage() {
             ))}
           </div>
 
-          {/* List */}
+          {/* LIST */}
           <div className="p-4 space-y-4">
-            {(activeTab === "current" ? filteredCurrent : filteredPast).map(
-              (med) => (
+            {(activeTab === "current"
+              ? currentMedications
+              : pastMedications
+            )
+              .filter((m) =>
+                m.name.toLowerCase().includes(searchQuery.toLowerCase())
+              )
+              .map((med) => (
                 <div
                   key={med._id}
-                  className="border rounded-lg p-4 flex justify-between"
+                  className="border rounded-lg p-4 flex flex-col sm:flex-row sm:justify-between gap-4"
                 >
                   <div className="flex gap-4">
-                    <div className="p-3 bg-blue-50 rounded-lg">
+                    <div className="p-3 bg-blue-50 rounded-lg h-fit">
                       <Pill className="text-blue-600" />
                     </div>
                     <div>
@@ -240,38 +175,28 @@ export default function MedicationsPage() {
                       <p className="text-sm text-gray-600">
                         {med.dosage} · {med.frequency}
                       </p>
-                      <p className="text-sm text-gray-500 mt-1">
+                      <p className="text-sm text-gray-500">
                         ⏰ {med.time} · Next refill: {formatDate(med.nextRefill)}
                       </p>
                       <p className="text-sm text-gray-500">
                         Prescribed by {med.prescribedBy}
                       </p>
                       {med.notes && (
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-sm text-gray-500">
                           Notes: {med.notes}
                         </p>
                       )}
                     </div>
                   </div>
 
-                  <div className="flex flex-col items-end gap-2">
-                    <span
-                      className={`px-3 py-1 text-xs rounded-full ${getStatusColor(
-                        med.status
-                      )}`}
-                    >
-                      {med.status}
-                    </span>
-
+                  <div className="flex sm:flex-col items-start sm:items-end gap-2">
                     {activeTab === "current" ? (
-                      <>
-                        <button
-                          onClick={() => handleRequestRefill(med._id)}
-                          className="text-blue-600 text-sm"
-                        >
-                          Request Refill
-                        </button>
-                      </>
+                      <button
+                        onClick={() => processRefill(med._id)}
+                        className="text-blue-600 text-sm"
+                      >
+                        Request Refill
+                      </button>
                     ) : (
                       <button
                         onClick={() => handleDeleteMedication(med._id)}
@@ -282,20 +207,21 @@ export default function MedicationsPage() {
                     )}
                   </div>
                 </div>
-              )
-            )}
+              ))}
           </div>
         </div>
 
-        {/* Schedule */}
-        <div id="med-schedule" className="mt-6 bg-white rounded-xl border p-6">
-          <h2 className="text-lg font-semibold mb-4">Today’s Schedule</h2>
+        {/* SCHEDULE */}
+        <div className="bg-white rounded-xl border p-5">
+          <h2 className="text-lg font-semibold mb-4">
+            Today’s Schedule
+          </h2>
 
           {medicationSchedule.length ? (
             medicationSchedule.map((item) => (
               <div
                 key={item.medicationId}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-2"
+                className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 p-3 bg-gray-50 rounded-lg mb-2"
               >
                 <div>
                   <p className="font-medium">{item.time}</p>
@@ -309,7 +235,7 @@ export default function MedicationsPage() {
                 ) : (
                   <button
                     onClick={() =>
-                      handleMarkAsTaken(item.medicationId)
+                      markMedicationAsTaken(item.medicationId)
                     }
                     className="text-blue-600 text-sm"
                   >
@@ -325,36 +251,34 @@ export default function MedicationsPage() {
           )}
         </div>
 
-        {/* Add Modal */}
+        {/* ADD MODAL */}
         {showAddModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
             <form
               onSubmit={handleAddMedication}
-              className="bg-white p-6 rounded-xl w-full max-w-md space-y-4"
+              className="bg-white p-5 rounded-xl w-full max-w-md space-y-4"
             >
-              <h2 className="text-xl font-semibold">Add Medication</h2>
+              <h2 className="text-lg font-semibold">
+                Add Medication
+              </h2>
 
-              {[
-                "name",
-                "dosage",
-                "frequency",
-                "time",
-                "prescribedBy",
-              ].map((field) => (
-                <input
-                  key={field}
-                  required
-                  placeholder={field}
-                  className="w-full border p-2 rounded"
-                  value={formData[field]}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      [field]: e.target.value,
-                    })
-                  }
-                />
-              ))}
+              {["name", "dosage", "frequency", "time", "prescribedBy"].map(
+                (field) => (
+                  <input
+                    key={field}
+                    required
+                    placeholder={field}
+                    className="w-full border p-2 rounded"
+                    value={formData[field]}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        [field]: e.target.value,
+                      })
+                    }
+                  />
+                )
+              )}
 
               <input
                 type="date"
@@ -362,10 +286,7 @@ export default function MedicationsPage() {
                 className="w-full border p-2 rounded"
                 value={formData.startDate}
                 onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    startDate: e.target.value,
-                  })
+                  setFormData({ ...formData, startDate: e.target.value })
                 }
               />
 
@@ -374,10 +295,7 @@ export default function MedicationsPage() {
                 className="w-full border p-2 rounded"
                 value={formData.nextRefill}
                 onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    nextRefill: e.target.value,
-                  })
+                  setFormData({ ...formData, nextRefill: e.target.value })
                 }
               />
 
@@ -386,10 +304,7 @@ export default function MedicationsPage() {
                 className="w-full border p-2 rounded"
                 value={formData.notes}
                 onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    notes: e.target.value,
-                  })
+                  setFormData({ ...formData, notes: e.target.value })
                 }
               />
 

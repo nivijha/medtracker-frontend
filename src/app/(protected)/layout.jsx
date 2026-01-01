@@ -17,11 +17,15 @@ export default function ProtectedLayout({ children }) {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Global Navbar for all protected pages */}
+      {/* Global Navbar */}
       <LoggedInNavbar />
 
       {/* Main content */}
-      <main className="flex-1 p-6 mt-4">{children}</main>
+      <main className="flex-1 px-4 sm:px-6 py-4 sm:py-6 mt-2 sm:mt-4">
+        <div className="max-w-7xl mx-auto w-full">
+          {children}
+        </div>
+      </main>
     </div>
   );
 }

@@ -27,8 +27,10 @@ const StatCard = ({ icon: Icon, label, value, color }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl border p-5 shadow-sm">
-      <div className={`inline-flex p-3 rounded-lg ${colors[color]} mb-3`}>
+    <div className="bg-white rounded-xl border p-5 shadow-sm text-center sm:text-left">
+      <div
+        className={`inline-flex p-3 rounded-lg ${colors[color]} mb-3 mx-auto sm:mx-0`}
+      >
         <Icon className="w-6 h-6" />
       </div>
       <p className="text-2xl font-bold">{value}</p>
@@ -38,13 +40,15 @@ const StatCard = ({ icon: Icon, label, value, color }) => {
 };
 
 const InfoRow = ({ icon: Icon, label, value }) => (
-  <div className="flex gap-4 p-4 bg-gray-50 rounded-lg">
+  <div className="flex gap-4 p-4 bg-gray-50 rounded-lg items-start">
     <div className="p-2 bg-white rounded-lg">
       <Icon className="w-5 h-5 text-gray-600" />
     </div>
     <div>
       <p className="text-sm text-gray-600">{label}</p>
-      <p className="font-medium">{value || "Not provided"}</p>
+      <p className="font-medium break-words">
+        {value || "Not provided"}
+      </p>
     </div>
   </div>
 );
@@ -91,44 +95,52 @@ export default function ProfilePage() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 px-4 sm:px-6 py-6">
       <div className="max-w-6xl mx-auto space-y-6">
+
         {/* HEADER */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white flex justify-between items-center">
-          <div className="flex items-center gap-6">
-            {user.profileImage ? (
-              <img
-                src={user.profileImage}
-                className="w-24 h-24 rounded-full object-cover border-4 border-white shadow"
-              />
-            ) : (
-              <div className="w-24 h-24 rounded-full bg-white text-blue-600 flex items-center justify-center text-3xl font-bold">
-                {user.name?.[0]}
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-6 sm:p-8 text-white">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-6">
+
+            <div className="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
+              {user.profileImage ? (
+                <img
+                  src={user.profileImage}
+                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-4 border-white shadow"
+                />
+              ) : (
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white text-blue-600 flex items-center justify-center text-2xl sm:text-3xl font-bold">
+                  {user.name?.[0]}
+                </div>
+              )}
+
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold">
+                  {user.name}
+                </h1>
+                <p className="text-blue-100 text-sm sm:text-base">
+                  {user.email}
+                </p>
+                <p className="text-xs sm:text-sm flex items-center justify-center sm:justify-start gap-1 mt-1">
+                  <Clock className="w-4 h-4" />
+                  Member since {memberSince}
+                </p>
               </div>
-            )}
-
-            <div>
-              <h1 className="text-3xl font-bold">{user.name}</h1>
-              <p className="text-blue-100">{user.email}</p>
-              <p className="text-sm flex items-center gap-1 mt-1">
-                <Clock className="w-4 h-4" />
-                Member since {memberSince}
-              </p>
             </div>
-          </div>
 
-          {/* EDIT BUTTON */}
-          <Link
-            href="/profile/edit"
-            className="bg-white text-blue-600 px-4 py-2 rounded-lg flex items-center gap-2"
-          >
-            <Edit className="w-4 h-4" /> Edit Profile
-          </Link>
+            {/* EDIT BUTTON */}
+            <Link
+              href="/profile/edit"
+              className="bg-white text-blue-600 px-4 py-2 rounded-lg flex items-center justify-center gap-2 w-full sm:w-auto"
+            >
+              <Edit className="w-4 h-4" /> Edit Profile
+            </Link>
+          </div>
         </div>
 
         {/* STATS */}
         {summary && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard
               icon={Calendar}
               label="Appointments"
@@ -153,15 +165,20 @@ export default function ProfilePage() {
               value={`${summary.wellnessScore}%`}
               color="orange"
             />
-            <p className="text-xs text-gray-500 mt-1">
-              Based on your care tracking activity
-            </p>
           </div>
         )}
 
+        {summary && (
+          <p className="text-xs text-gray-500 text-center sm:text-left">
+            Based on your care tracking activity
+          </p>
+        )}
+
         {/* PERSONAL INFO */}
-        <div className="bg-white rounded-xl border p-6 space-y-4">
-          <h2 className="text-lg font-semibold">Personal Information</h2>
+        <div className="bg-white rounded-xl border p-5 sm:p-6 space-y-4">
+          <h2 className="text-lg font-semibold">
+            Personal Information
+          </h2>
 
           <InfoRow icon={User} label="Full Name" value={user.name} />
           <InfoRow icon={Mail} label="Email" value={user.email} />

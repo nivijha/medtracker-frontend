@@ -1,7 +1,13 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Calendar as CalendarIcon, Clock, Plus, Search, Loader2 } from "lucide-react";
+import {
+  Calendar as CalendarIcon,
+  Clock,
+  Plus,
+  Search,
+  Loader2,
+} from "lucide-react";
 import {
   getAppointments,
   createAppointment,
@@ -30,7 +36,6 @@ export default function AppointmentsPage() {
     notes: "",
   });
 
-  /* ---------------- FETCH ---------------- */
   useEffect(() => {
     fetchAppointments();
   }, []);
@@ -40,14 +45,11 @@ export default function AppointmentsPage() {
       setLoading(true);
       const res = await getAppointments();
       setAppointments(res);
-    } catch {
-      alert("Failed to load appointments");
     } finally {
       setLoading(false);
     }
   };
 
-  /* ---------------- HELPERS ---------------- */
   const getDateTime = (apt) =>
     apt.appointmentDateTime ? new Date(apt.appointmentDateTime) : null;
 
@@ -77,28 +79,16 @@ export default function AppointmentsPage() {
       notes: "",
     });
 
-  /* ---------------- ADD ---------------- */
   const handleAddAppointment = async (e) => {
     e.preventDefault();
-
-    if (!formData.doctorName.trim()) return alert("Doctor name is required");
-    if (!formData.date) return alert("Please select a date");
-    if (!formData.time) return alert("Please select a time");
-
-    try {
-      setIsSaving(true);
-      await createAppointment(formData);
-      setShowAddModal(false);
-      resetForm();
-      fetchAppointments();
-    } catch (err) {
-      alert(err.response?.data?.message || "Failed to save appointment");
-    } finally {
-      setIsSaving(false);
-    }
+    setIsSaving(true);
+    await createAppointment(formData);
+    setShowAddModal(false);
+    resetForm();
+    fetchAppointments();
+    setIsSaving(false);
   };
 
-  /* ---------------- RESCHEDULE ---------------- */
   const handleReschedule = (apt) => {
     const dt = new Date(apt.appointmentDateTime);
     setSelectedAppointment(apt);
@@ -111,26 +101,17 @@ export default function AppointmentsPage() {
   };
 
   const confirmReschedule = async () => {
-    if (!formData.date || !formData.time)
-      return alert("Date and time required");
-
-    try {
-      setIsSaving(true);
-      await rescheduleAppointment(selectedAppointment._id, {
-        date: formData.date,
-        time: formData.time,
-      });
-      setShowRescheduleModal(false);
-      setSelectedAppointment(null);
-      fetchAppointments();
-    } catch {
-      alert("Failed to reschedule");
-    } finally {
-      setIsSaving(false);
-    }
+    setIsSaving(true);
+    await rescheduleAppointment(selectedAppointment._id, {
+      date: formData.date,
+      time: formData.time,
+    });
+    setShowRescheduleModal(false);
+    setSelectedAppointment(null);
+    fetchAppointments();
+    setIsSaving(false);
   };
 
-  /* ---------------- CANCEL / DELETE ---------------- */
   const handleCancel = async (id) => {
     if (!confirm("Cancel this appointment?")) return;
     await cancelAppointment(id);
@@ -143,7 +124,6 @@ export default function AppointmentsPage() {
     fetchAppointments();
   };
 
-  /* ---------------- UI ---------------- */
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -153,26 +133,29 @@ export default function AppointmentsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gray-50 px-4 sm:px-6 py-6">
+      <div className="max-w-6xl mx-auto space-y-6">
 
         {/* HEADER */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Appointments</h1>
-            <p className="text-gray-600">Manage your appointments</p>
+            <h1 className="text-2xl sm:text-3xl font-bold">Appointments</h1>
+            <p className="text-gray-600 text-sm sm:text-base">
+              Manage your appointments
+            </p>
           </div>
+
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg"
           >
             <Plus className="w-4 h-4" /> Add Appointment
           </button>
         </div>
 
         {/* SEARCH */}
-        <div className="mb-6 relative">
-          <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
             placeholder="Search doctor or specialty..."
             value={searchQuery}
@@ -182,13 +165,13 @@ export default function AppointmentsPage() {
         </div>
 
         {/* TABS */}
-        <div className="bg-white rounded-xl shadow">
-          <div className="flex border-b">
+        <div className="bg-white rounded-xl border">
+          <div className="flex border-b text-sm sm:text-base">
             {["upcoming", "past"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`flex-1 py-3 ${
+                className={`flex-1 py-3 font-medium ${
                   activeTab === tab
                     ? "border-b-2 border-blue-600 text-blue-600"
                     : "text-gray-500"
@@ -199,11 +182,15 @@ export default function AppointmentsPage() {
             ))}
           </div>
 
+          {/* LIST */}
           <div className="p-4 space-y-4">
             {filtered.map((apt) => {
               const dt = new Date(apt.appointmentDateTime);
               return (
-                <div key={apt._id} className="border rounded-lg p-4 flex justify-between">
+                <div
+                  key={apt._id}
+                  className="border rounded-lg p-4 flex flex-col sm:flex-row sm:justify-between gap-4"
+                >
                   <div>
                     <h3 className="font-semibold">{apt.doctorName}</h3>
                     <p className="text-sm text-gray-600">
@@ -211,7 +198,7 @@ export default function AppointmentsPage() {
                     </p>
                     <p className="text-sm text-gray-500">{apt.hospital}</p>
 
-                    <div className="flex gap-4 text-sm mt-2 text-gray-500">
+                    <div className="flex flex-wrap gap-4 text-sm mt-2 text-gray-500">
                       <span className="flex items-center gap-1">
                         <CalendarIcon className="w-4 h-4" />
                         {dt.toLocaleDateString("en-IN")}
@@ -227,7 +214,7 @@ export default function AppointmentsPage() {
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-2 text-right">
+                  <div className="flex sm:flex-col items-start sm:items-end gap-2">
                     {activeTab === "upcoming" ? (
                       <>
                         <button
@@ -259,24 +246,15 @@ export default function AppointmentsPage() {
         </div>
       </div>
 
-      {/* ADD MODAL */}
-      {showAddModal && (
+      {/* ADD / RESCHEDULE MODAL */}
+      {(showAddModal || showRescheduleModal) && (
         <Modal
-          title="Book Appointment"
-          onClose={() => setShowAddModal(false)}
-          onSubmit={handleAddAppointment}
-          formData={formData}
-          setFormData={setFormData}
-          isSaving={isSaving}
-        />
-      )}
-
-      {/* RESCHEDULE MODAL */}
-      {showRescheduleModal && (
-        <Modal
-          title="Reschedule Appointment"
-          onClose={() => setShowRescheduleModal(false)}
-          onSubmit={confirmReschedule}
+          title={showAddModal ? "Book Appointment" : "Reschedule Appointment"}
+          onClose={() => {
+            setShowAddModal(false);
+            setShowRescheduleModal(false);
+          }}
+          onSubmit={showAddModal ? handleAddAppointment : confirmReschedule}
           formData={formData}
           setFormData={setFormData}
           isSaving={isSaving}
@@ -289,18 +267,23 @@ export default function AppointmentsPage() {
 /* ---------------- MODAL ---------------- */
 function Modal({ title, onClose, onSubmit, formData, setFormData, isSaving }) {
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-xl w-full max-w-md">
-        <h2 className="text-xl font-semibold mb-4">{title}</h2>
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
+      <div className="bg-white p-5 rounded-xl w-full max-w-md">
+        <h2 className="text-lg sm:text-xl font-semibold mb-4">{title}</h2>
 
-        <Input label="Doctor Name" field="doctorName" formData={formData} setFormData={setFormData} />
-        <Input label="Specialty" field="specialty" formData={formData} setFormData={setFormData} />
-        <Input label="Hospital / Clinic" field="hospital" formData={formData} setFormData={setFormData} />
-        <Input label="Date" type="date" field="date" formData={formData} setFormData={setFormData} />
-        <Input label="Time" type="time" field="time" formData={formData} setFormData={setFormData} />
+        {["doctorName", "specialty", "hospital"].map((f) => (
+          <Input key={f} label={f} field={f} formData={formData} setFormData={setFormData} />
+        ))}
 
-        <div className="flex gap-3 mt-4">
-          <button disabled={isSaving} onClick={onClose} className="flex-1 border rounded-lg py-2">
+        <Input type="date" label="Date" field="date" formData={formData} setFormData={setFormData} />
+        <Input type="time" label="Time" field="time" formData={formData} setFormData={setFormData} />
+
+        <div className="flex flex-col sm:flex-row gap-3 mt-4">
+          <button
+            disabled={isSaving}
+            onClick={onClose}
+            className="flex-1 border rounded-lg py-2"
+          >
             Cancel
           </button>
           <button
@@ -308,11 +291,17 @@ function Modal({ title, onClose, onSubmit, formData, setFormData, isSaving }) {
             onClick={onSubmit}
             className={`flex-1 rounded-lg py-2 flex items-center justify-center gap-2 ${
               isSaving
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                ? "bg-gray-300 text-gray-500"
                 : "bg-blue-600 text-white hover:bg-blue-700"
             }`}
           >
-            {isSaving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</> : "Save"}
+            {isSaving ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" /> Saving…
+              </>
+            ) : (
+              "Save"
+            )}
           </button>
         </div>
       </div>

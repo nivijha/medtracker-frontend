@@ -17,13 +17,13 @@ import { getAppointments, getReports, getMedications } from "@/lib/utils";
 const DashboardCard = ({ title, value, subtitle, icon: Icon, onClick }) => (
   <div
     onClick={onClick}
-    className="p-6 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md cursor-pointer"
+    className="p-5 sm:p-6 bg-white rounded-xl border shadow-sm hover:shadow-md cursor-pointer"
   >
     <div className="p-3 bg-gray-100 rounded-lg w-fit mb-4">
       <Icon className="w-6 h-6 text-gray-600" />
     </div>
     <h3 className="text-sm text-gray-600">{title}</h3>
-    <p className="text-3xl font-bold text-gray-900">{value}</p>
+    <p className="text-2xl sm:text-3xl font-bold text-gray-900">{value}</p>
     <p className="text-sm text-gray-500">{subtitle}</p>
   </div>
 );
@@ -99,8 +99,6 @@ export default function DashboardPage() {
       setReports(reps || []);
       setMedications(meds || []);
 
-      /* -------- Detect new vs existing user (FRONTEND ONLY) -------- */
-
       const noDataYet =
         (!apts || apts.length === 0) &&
         (!reps || reps.length === 0) &&
@@ -108,14 +106,10 @@ export default function DashboardPage() {
 
       setIsNewUser(noDataYet);
 
-      /* -------- Get user name from localStorage -------- */
-
       const storedUser = JSON.parse(localStorage.getItem("user"));
       if (storedUser?.name) {
         setUserName(storedUser.name.split(" ")[0]);
       }
-
-      /* ---------------- BUILD ACTIVITY ---------------- */
 
       let activity = [];
 
@@ -147,13 +141,12 @@ export default function DashboardPage() {
         });
       });
 
-      const sortedActivity = activity
-        .filter((a) => a.time)
-        .sort((a, b) => new Date(b.time) - new Date(a.time));
-
-      setRecentActivity(sortedActivity.slice(0, 6));
-    } catch (err) {
-      alert("Failed to load dashboard data");
+      setRecentActivity(
+        activity
+          .filter((a) => a.time)
+          .sort((a, b) => new Date(b.time) - new Date(a.time))
+          .slice(0, 6)
+      );
     } finally {
       setLoading(false);
     }
@@ -175,31 +168,32 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 px-4 sm:px-6 py-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex justify-between items-center">
+
+        {/* HEADER */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
               {isNewUser
                 ? `Welcome, ${userName}`
                 : `Welcome back, ${userName}`}
             </h1>
-            <p className="text-gray-600">
+            <p className="text-gray-600 text-sm sm:text-base">
               Overview of your health activity
             </p>
           </div>
 
           <button
             onClick={() => router.push("/profile")}
-            className="p-3 bg-white border rounded-xl hover:shadow"
+            className="self-start sm:self-auto p-3 bg-white border rounded-xl hover:shadow"
           >
             <User className="w-5 h-5 text-gray-600" />
           </button>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* STATS */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <DashboardCard
             title="Upcoming Appointments"
             value={upcomingAppointments}
@@ -230,9 +224,9 @@ export default function DashboardPage() {
           />
         </div>
 
-        {/* Recent Activity */}
+        {/* RECENT ACTIVITY */}
         <div className="bg-white rounded-xl border shadow-sm">
-          <div className="p-6 border-b">
+          <div className="p-5 sm:p-6 border-b">
             <h2 className="text-lg font-semibold">Recent Activity</h2>
             <p className="text-sm text-gray-500">
               Sorted by latest updates

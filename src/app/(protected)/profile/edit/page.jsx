@@ -62,8 +62,6 @@ export default function EditProfilePage() {
   const [passwordError, setPasswordError] = useState("");
   const [passwordSuccess, setPasswordSuccess] = useState("");
 
-  /* ================= LOAD PROFILE ================= */
-
   useEffect(() => {
     loadProfile();
   }, []);
@@ -86,8 +84,6 @@ export default function EditProfilePage() {
   const updateField = (field, value) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
-  /* ================= VALIDATION ================= */
-
   const passwordTouched =
     passwords.current || passwords.new || passwords.confirm;
 
@@ -99,12 +95,11 @@ export default function EditProfilePage() {
 
   const passwordTooShort = passwords.new && passwords.new.length < 6;
 
-  const passwordInvalid = passwordMismatch || sameAsCurrent || passwordTooShort;
+  const passwordInvalid =
+    passwordMismatch || sameAsCurrent || passwordTooShort;
 
   const isProfileChanged = () =>
     form.name || form.email || form.phone || form.address || form.profileImage;
-
-  /* ================= SAVE ================= */
 
   const handleSave = async () => {
     setPasswordError("");
@@ -112,21 +107,17 @@ export default function EditProfilePage() {
 
     try {
       setSaving(true);
-
       const res = await updateProfile(form);
 
       localStorage.setItem("user", JSON.stringify(res.user));
-
       window.dispatchEvent(new Event("storage"));
 
       if (passwordTouched) {
         if (passwordInvalid) return;
-
         await updateUserSecurity({
           currentPassword: passwords.current,
           newPassword: passwords.new,
         });
-
         setPasswordSuccess("Password updated successfully");
       }
 
@@ -141,8 +132,6 @@ export default function EditProfilePage() {
     }
   };
 
-  /* ================= LOADING ================= */
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -151,19 +140,23 @@ export default function EditProfilePage() {
     );
   }
 
-  /* ================= UI ================= */
-
   return (
-    <div className="min-h-screen bg-gray-50 flex justify-center p-6">
-      <div className="w-full max-w-xl bg-white rounded-2xl shadow p-6 space-y-8">
-        <h1 className="text-2xl font-bold">Edit Profile</h1>
+    <div className="min-h-screen bg-gray-50 px-4 sm:px-6 py-6 flex justify-center">
+      <div className="w-full max-w-xl bg-white rounded-2xl shadow p-5 sm:p-6 space-y-8">
+
+        <h1 className="text-xl sm:text-2xl font-bold">
+          Edit Profile
+        </h1>
 
         {/* PROFILE IMAGE */}
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-center gap-4">
           {form.profileImage ? (
-            <img src={form.profileImage} className="w-24 h-24 rounded-full" />
+            <img
+              src={form.profileImage}
+              className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover"
+            />
           ) : (
-            <div className="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center text-3xl font-bold">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-blue-100 flex items-center justify-center text-2xl sm:text-3xl font-bold">
               {form.name?.[0]}
             </div>
           )}
@@ -188,66 +181,24 @@ export default function EditProfilePage() {
         </div>
 
         {/* PROFILE INFO */}
-        <Input
-          label="Full Name"
-          icon={User}
-          value={form.name}
-          onChange={(v) => updateField("name", v)}
-        />
-        <Input
-          label="Email"
-          icon={Mail}
-          value={form.email}
-          onChange={(v) => updateField("email", v)}
-        />
-        <Input
-          label="Phone"
-          icon={Phone}
-          value={form.phone}
-          onChange={(v) => updateField("phone", v)}
-        />
-        <Input
-          label="Address"
-          icon={MapPin}
-          value={form.address}
-          onChange={(v) => updateField("address", v)}
-        />
+        <Input label="Full Name" icon={User} value={form.name} onChange={(v) => updateField("name", v)} />
+        <Input label="Email" icon={Mail} value={form.email} onChange={(v) => updateField("email", v)} />
+        <Input label="Phone" icon={Phone} value={form.phone} onChange={(v) => updateField("phone", v)} />
+        <Input label="Address" icon={MapPin} value={form.address} onChange={(v) => updateField("address", v)} />
 
         {/* PASSWORD */}
         <div className="pt-6 border-t space-y-3">
-          <h2 className="text-lg font-semibold flex gap-2">
+          <h2 className="text-base sm:text-lg font-semibold flex gap-2">
             <Lock className="w-5 h-5" /> Change Password
           </h2>
 
-          <PasswordInput
-            placeholder="Current password"
-            value={passwords.current}
-            onChange={(v) => setPasswords((p) => ({ ...p, current: v }))}
-            show={showPassword}
-            toggle={() => setShowPassword(!showPassword)}
-          />
-          <PasswordInput
-            placeholder="New password"
-            value={passwords.new}
-            onChange={(v) => setPasswords((p) => ({ ...p, new: v }))}
-            show={showPassword}
-            toggle={() => setShowPassword(!showPassword)}
-          />
-          <PasswordInput
-            placeholder="Confirm new password"
-            value={passwords.confirm}
-            onChange={(v) => setPasswords((p) => ({ ...p, confirm: v }))}
-            show={showPassword}
-            toggle={() => setShowPassword(!showPassword)}
-          />
+          <PasswordInput placeholder="Current password" value={passwords.current} onChange={(v) => setPasswords((p) => ({ ...p, current: v }))} show={showPassword} toggle={() => setShowPassword(!showPassword)} />
+          <PasswordInput placeholder="New password" value={passwords.new} onChange={(v) => setPasswords((p) => ({ ...p, new: v }))} show={showPassword} toggle={() => setShowPassword(!showPassword)} />
+          <PasswordInput placeholder="Confirm new password" value={passwords.confirm} onChange={(v) => setPasswords((p) => ({ ...p, confirm: v }))} show={showPassword} toggle={() => setShowPassword(!showPassword)} />
 
           {passwordMismatch && <InlineError message="Passwords do not match" />}
-          {sameAsCurrent && (
-            <InlineError message="New password must be different" />
-          )}
-          {passwordTooShort && (
-            <InlineError message="Password must be at least 6 characters" />
-          )}
+          {sameAsCurrent && <InlineError message="New password must be different" />}
+          {passwordTooShort && <InlineError message="Password must be at least 6 characters" />}
           {passwordError && <InlineError message={passwordError} />}
           {passwordSuccess && (
             <div className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded-lg text-sm">
@@ -258,10 +209,10 @@ export default function EditProfilePage() {
         </div>
 
         {/* ACTIONS */}
-        <div className="flex justify-end gap-3 pt-4">
+        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
           <button
             onClick={() => router.push("/profile")}
-            className="border px-4 py-2 rounded-lg flex gap-2"
+            className="border px-4 py-2 rounded-lg flex items-center justify-center gap-2 w-full sm:w-auto"
           >
             <X className="w-4 h-4" /> Cancel
           </button>
@@ -274,14 +225,13 @@ export default function EditProfilePage() {
               (passwordTouched && passwordInvalid) ||
               (!isProfileChanged() && !passwordTouched)
             }
-            className={`px-4 py-2 rounded-lg flex gap-2 ${
+            className={`px-4 py-2 rounded-lg flex items-center justify-center gap-2 w-full sm:w-auto ${
               saving || uploading || passwordInvalid
                 ? "bg-gray-300 cursor-not-allowed"
                 : "bg-blue-600 text-white hover:bg-blue-700"
             }`}
           >
-            <Save className="w-4 h-4" />
-            Save Changes
+            <Save className="w-4 h-4" /> Save Changes
           </button>
         </div>
       </div>
