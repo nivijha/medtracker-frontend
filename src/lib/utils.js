@@ -1,35 +1,28 @@
 import axios from "axios";
 
+/* ================== AXIOS INSTANCE ================== */
 const API = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000",
+  withCredentials: true,
 });
-
-// Attach token automatically
 API.interceptors.request.use((config) => {
-  if (typeof window !== "undefined") {
-    const token = localStorage.getItem("token");
-    if (token) config.headers.Authorization = `Bearer ${token}`;
+  const token = localStorage.getItem("token");
+  console.log("AUTH TOKEN:", token); 
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
-// Global error handling (auto logout if token invalid)
-API.interceptors.response.use(
-  (res) => res,
-  (err) => {
-    if (err.response?.status === 401 && typeof window !== "undefined") {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      document.cookie = "token=; path=/; max-age=0;";
-      window.location.href = "/login";
-    }
-    return Promise.reject(err);
-  }
-);
-
-// ------- AUTH APIs -------
-export const registerUser = async (name, email, password) => {
-  const res = await API.post("/api/auth/register", { name, email, password });
+/* ================== AUTH APIs ================== */
+export const registerUser = async (name, email, phone, password) => {
+  const res = await API.post("/api/auth/register", {
+    name,
+    email,
+    phone,
+    password,
+  });
   return res.data;
 };
 
@@ -43,8 +36,32 @@ export const getCurrentUser = async () => {
   return res.data;
 };
 
+/* ================== PROFILE APIs ================== */
 
-// ------- REPORT APIs -------
+export const getProfile = async () => {
+  const res = await API.get("/api/profile");
+  return res.data;
+};
+
+export const updateProfile = async (data) => {
+  const res = await API.put("/api/profile", data);
+  return res.data;
+};
+
+export const getHealthSummary = async () => {
+  const res = await API.get("/api/profile/summary");
+  return res.data;
+};
+
+export const updateUserSecurity = async ({ currentPassword, newPassword }) => {
+  const res = await API.put("/api/profile/change-password", {
+    currentPassword,
+    newPassword,
+  });
+  return res.data;
+};
+
+/* ================== REPORT APIs ================== */
 
 export const getReports = async () => {
   const res = await API.get("/api/reports/my");
@@ -52,15 +69,10 @@ export const getReports = async () => {
 };
 
 export const uploadReport = async (formData) => {
-  try {
-    const res = await API.post("/api/reports/upload", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
-    return res.data;
-  } catch (err) {
-    console.error("UPLOAD ERROR:", err.response?.data || err.message);
-    throw err;
-  }
+  const res = await API.post("/api/reports/upload", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return res.data;
 };
 
 export const deleteReport = async (reportId) => {
@@ -68,8 +80,8 @@ export const deleteReport = async (reportId) => {
   return res.data;
 };
 
+/* ================== MEDICATION APIs ================== */
 
-// ------- Medications APIs ------- 
 export const getMedications = async () => {
   const res = await API.get("/api/medications");
   return res.data.medications || [];
@@ -100,8 +112,8 @@ export const processRefill = async (id) => {
   return res.data.medication;
 };
 
+/* ================== APPOINTMENT APIs ================== */
 
-// ------- APPOINTMENT APIs -------
 export const getAppointments = async () => {
   const res = await API.get("/api/appointments");
   return res.data.appointments || [];
@@ -134,21 +146,25 @@ export const deleteAppointment = async (id) => {
 
 export const getAvailableSlots = async (doctorId, date) => {
   const res = await API.get("/api/appointments/available-slots", {
-    params: { doctorId, date }
+    params: { doctorId, date },
   });
   return res.data.availableSlots || [];
 };
 
 export const rescheduleAppointment = async (id, newDateTime) => {
-  const res = await API.put(`/api/appointments/${id}/reschedule`, { newDateTime });
+  const res = await API.put(`/api/appointments/${id}/reschedule`, {
+    newDateTime,
+  });
   return res.data.appointment || res.data;
 };
 
+/* ================== ACTIVITY APIs ================== */
 
-// ------- ACTIVITY APIs -------
 export const getRecentActivity = async () => {
   const res = await API.get("/api/activity");
   return res.data || [];
 };
+
+/* ================== EXPORT INSTANCE ================== */
 
 export default API;
