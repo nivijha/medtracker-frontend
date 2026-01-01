@@ -113,16 +113,12 @@ export default function EditProfilePage() {
     try {
       setSaving(true);
 
-      // ✅ 1. Update profile
       const res = await updateProfile(form);
 
-      // ✅ 2. Update localStorage user (THIS FIXES NAVBAR IMAGE)
       localStorage.setItem("user", JSON.stringify(res.user));
 
-      // ✅ 3. Notify navbar to re-read user
       window.dispatchEvent(new Event("storage"));
 
-      // ✅ 4. Update password if needed
       if (passwordTouched) {
         if (passwordInvalid) return;
 

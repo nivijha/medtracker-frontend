@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Heart, Mail, Lock, Eye, EyeOff, User } from "lucide-react";
+import { Heart, Mail, Lock, Eye, EyeOff, User, Phone } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { registerUser, loginUser } from "@/lib/utils";
@@ -13,6 +13,7 @@ export default function Login() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     password: "",
     confirmPassword: "",
   });
@@ -35,18 +36,26 @@ export default function Login() {
       let data;
 
       if (isLogin) {
-        // LOGIN
+        // LOGIN (no phone)
         data = await loginUser(formData.email, formData.password);
       } else {
-        // SIGNUP
+        // SIGNUP (phone required)
         if (formData.password !== formData.confirmPassword) {
           setError("Passwords do not match");
           setLoading(false);
           return;
         }
+
+        if (!formData.phone) {
+          setError("Phone number is required");
+          setLoading(false);
+          return;
+        }
+
         data = await registerUser(
           formData.name,
           formData.email,
+          formData.phone,
           formData.password
         );
       }
@@ -116,7 +125,7 @@ export default function Login() {
                   Full Name
                 </label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     type="text"
                     name="name"
@@ -124,7 +133,28 @@ export default function Login() {
                     onChange={handleChange}
                     placeholder="John Doe"
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    required={!isLogin}
+                    required
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Phone Number (Sign Up Only) */}
+            {!isLogin && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Phone Number
+                </label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder="9876543210"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
                   />
                 </div>
               </div>
@@ -136,7 +166,7 @@ export default function Login() {
                 Email Address
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="email"
                   name="email"
@@ -155,7 +185,7 @@ export default function Login() {
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
@@ -168,13 +198,9 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
+                  {showPassword ? <EyeOff /> : <Eye />}
                 </button>
               </div>
             </div>
@@ -186,16 +212,23 @@ export default function Login() {
                   Confirm Password
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     type={showPassword ? "text" : "password"}
                     name="confirmPassword"
+                    placeholder="••••••••"
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    placeholder="••••••••"
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    required={!isLogin}
+                    className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
                   />
+                  <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? <EyeOff /> : <Eye />}
+                </button>
                 </div>
               </div>
             )}
@@ -214,12 +247,6 @@ export default function Login() {
                 : "Create Account"}
             </button>
           </form>
-        </div>
-
-        <div className="text-center mt-6">
-          <Link href="/" className="text-sm text-gray-600 hover:text-blue-600">
-            ← Back to Home
-          </Link>
         </div>
       </div>
     </div>

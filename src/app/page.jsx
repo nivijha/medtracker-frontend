@@ -11,7 +11,7 @@ import {
   ChevronRight,
   Menu,
   X,
-  Info
+  Info,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -59,6 +59,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-white">
+
       {/* NAVBAR */}
       <nav className="bg-white shadow-sm fixed w-full top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
@@ -117,39 +118,44 @@ export default function LandingPage() {
       </nav>
 
       {/* HERO */}
-      <section className="pt-28 pb-20 px-4 bg-gradient-to-br from-blue-50 to-white">
+      <section className="pt-36 pb-28 px-4 bg-gradient-to-br from-blue-50 to-white">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
           <div>
-            <h1 className="text-5xl font-bold text-gray-900">
+            <h1 className="text-5xl font-bold text-gray-900 leading-tight">
               Manage Your Health
               <span className="text-blue-600"> Records Easily</span>
             </h1>
-            <p className="mt-6 text-lg text-gray-600">
+
+            <p className="mt-8 text-lg text-gray-600 max-w-xl">
               MedTracker helps you organize medical documents, appointments, and
               reminders — all in one secure place.
             </p>
 
-            <div className="mt-8 flex gap-4">
+            <div className="mt-10 flex gap-4">
               <Link href="/login">
-                <button className="bg-blue-600 text-white px-8 py-3 rounded-lg flex items-center">
+                <button className="bg-blue-600 text-white px-8 py-3 rounded-lg flex items-center hover:bg-blue-700 transition">
                   Get Started Free
                   <ChevronRight className="ml-2 w-5 h-5" />
                 </button>
               </Link>
-              <button className="border border-blue-600 text-blue-600 px-8 py-3 rounded-lg hover:bg-blue-50">
+
+              {/* Learn More scrolls down */}
+              <a
+                href="#features"
+                className="border border-blue-600 text-blue-600 px-8 py-3 rounded-lg hover:bg-blue-50 transition"
+              >
                 Learn More
-              </button>
+              </a>
             </div>
 
-            {/* DISCLAIMER */}
-            <div className="mt-6 flex items-start gap-2 text-sm text-gray-500">
+            <div className="mt-8 flex items-start gap-2 text-sm text-gray-500">
               <Info className="w-4 h-4 mt-0.5" />
               MedTracker is a personal health management tool and does not
               provide medical diagnosis or treatment.
             </div>
           </div>
 
-          {/* VISUAL PLACEHOLDER */}
+          {/* VISUAL */}
           <div className="hidden md:block bg-white rounded-2xl shadow-xl p-8">
             <div className="h-40 bg-blue-600 rounded-lg flex items-center justify-center">
               <Activity className="w-16 h-16 text-white" />
@@ -224,3 +230,4 @@ export default function LandingPage() {
     </div>
   );
 }
+``
