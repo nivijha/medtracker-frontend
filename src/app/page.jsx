@@ -65,7 +65,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
           <div className="flex items-center">
             <Heart className="w-8 h-8 text-blue-600" />
-            <span className="ml-2 text-2xl font-bold text-blue-600">
+            <span className="ml-2 text-xl sm:text-2xl font-bold text-blue-600">
               MedTracker
             </span>
           </div>
@@ -98,11 +98,11 @@ export default function LandingPage() {
         </div>
 
         {mobileMenuOpen && (
-          <div className="md:hidden bg-white border-t px-4 py-4 space-y-3">
-            <a href="#features" className="block text-gray-700">
+          <div className="md:hidden bg-white border-t px-6 py-6 space-y-4">
+            <a href="#features" className="block text-base text-gray-700">
               Features
             </a>
-            <a href="#how-it-works" className="block text-gray-700">
+            <a href="#how-it-works" className="block text-base text-gray-700">
               How It Works
             </a>
             <Link href="/login" className="block text-blue-600 font-medium">
@@ -118,37 +118,36 @@ export default function LandingPage() {
       </nav>
 
       {/* HERO */}
-      <section className="pt-36 pb-28 px-4 bg-gradient-to-br from-blue-50 to-white">
+      <section className="pt-28 md:pt-36 pb-20 md:pb-28 px-4 bg-gradient-to-br from-blue-50 to-white">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
           <div>
-            <h1 className="text-5xl font-bold text-gray-900 leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
               Manage Your Health
               <span className="text-blue-600"> Records Easily</span>
             </h1>
 
-            <p className="mt-8 text-lg text-gray-600 max-w-xl">
+            <p className="mt-6 md:mt-8 text-base sm:text-lg text-gray-600 max-w-xl">
               MedTracker helps you organize medical documents, appointments, and
               reminders — all in one secure place.
             </p>
 
-            <div className="mt-10 flex gap-4">
+            <div className="mt-8 flex flex-col sm:flex-row gap-4">
               <Link href="/login">
-                <button className="bg-blue-600 text-white px-8 py-3 rounded-lg flex items-center hover:bg-blue-700 transition">
+                <button className="w-full sm:w-auto bg-blue-600 text-white px-8 py-3 rounded-lg flex items-center justify-center hover:bg-blue-700 transition">
                   Get Started Free
                   <ChevronRight className="ml-2 w-5 h-5" />
                 </button>
               </Link>
 
-              {/* Learn More scrolls down */}
               <a
                 href="#features"
-                className="border border-blue-600 text-blue-600 px-8 py-3 rounded-lg hover:bg-blue-50 transition"
+                className="w-full sm:w-auto border border-blue-600 text-blue-600 px-8 py-3 rounded-lg text-center hover:bg-blue-50 transition"
               >
                 Learn More
               </a>
             </div>
 
-            <div className="mt-8 flex items-start gap-2 text-sm text-gray-500">
+            <div className="mt-6 flex items-start gap-2 text-xs sm:text-sm text-gray-500">
               <Info className="w-4 h-4 mt-0.5" />
               MedTracker is a personal health management tool and does not
               provide medical diagnosis or treatment.
@@ -168,7 +167,7 @@ export default function LandingPage() {
       <section id="features" className="py-20 px-4 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-14">
-            <h2 className="text-4xl font-bold text-gray-900">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
               What You Can Do with MedTracker
             </h2>
             <p className="mt-4 text-gray-600">
@@ -180,9 +179,9 @@ export default function LandingPage() {
             {features.map((feature, i) => (
               <div
                 key={i}
-                className="p-6 border rounded-xl hover:shadow-md transition"
+                className="p-6 border rounded-xl hover:shadow-md transition text-center sm:text-left"
               >
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 mb-4">
+                <div className="w-12 h-12 mx-auto sm:mx-0 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 mb-4">
                   {feature.icon}
                 </div>
                 <h3 className="text-xl font-semibold mb-2">
@@ -201,7 +200,9 @@ export default function LandingPage() {
         className="py-20 px-4 bg-gradient-to-br from-blue-50 to-white"
       >
         <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-4xl font-bold mb-12">How It Works</h2>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-10">
+            How It Works
+          </h2>
           <div className="grid md:grid-cols-3 gap-8">
             {[
               ["1", "Create Account", "Sign up securely in minutes"],
@@ -209,10 +210,10 @@ export default function LandingPage() {
               ["3", "Stay Organized", "Access everything from your dashboard"],
             ].map(([step, title, desc]) => (
               <div key={step}>
-                <div className="w-16 h-16 mx-auto bg-blue-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mb-4">
+                <div className="w-14 h-14 mx-auto bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4">
                   {step}
                 </div>
-                <h3 className="text-xl font-semibold mb-2">{title}</h3>
+                <h3 className="text-lg font-semibold mb-2">{title}</h3>
                 <p className="text-gray-600">{desc}</p>
               </div>
             ))}
@@ -221,7 +222,7 @@ export default function LandingPage() {
       </section>
 
       {/* FOOTER */}
-      <footer className="bg-gray-900 text-gray-400 py-10 text-center">
+      <footer className="bg-gray-900 text-gray-400 py-10 text-center px-4">
         <p>© 2026 MedTracker. All rights reserved.</p>
         <p className="text-sm mt-2">
           MedTracker is not a medical service or diagnostic platform.
@@ -230,4 +231,3 @@ export default function LandingPage() {
     </div>
   );
 }
-``
