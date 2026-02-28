@@ -11,12 +11,26 @@ import {
   Plus,
   ArrowRight,
   Loader2,
-  ChevronRight
+  ChevronRight,
+  Shield,
+  Zap
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getAppointments, getReports, getMedications } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 
 /* ---------------- UI COMPONENTS ---------------- */
+
+const ClinicalHologram = () => (
+  <div className="absolute top-0 right-0 w-[500px] h-[500px] pointer-events-none opacity-20 hidden xl:block">
+    <div className="absolute inset-0 bg-gradient-to-br from-teal-500/20 to-transparent rounded-full blur-[120px] animate-pulse" />
+    <svg viewBox="0 0 200 200" className="w-full h-full text-teal-500/20 animate-[spin_60s_linear_infinite]">
+      <circle cx="100" cy="100" r="80" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="1 4" />
+      <circle cx="100" cy="100" r="60" fill="none" stroke="currentColor" strokeWidth="0.2" />
+      <path d="M100 20 L100 180 M20 100 L180 100" stroke="currentColor" strokeWidth="0.1" />
+    </svg>
+  </div>
+);
 
 const DashboardCard = ({ title, value, subtitle, icon: Icon, onClick, accent = "slate" }) => {
   const accentStyles = {
@@ -94,9 +108,9 @@ const ActivityItem = ({ title, time, status }) => {
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
 
   const [loading, setLoading] = useState(true);
-  const [userName, setUserName] = useState("User");
   const [isNewUser, setIsNewUser] = useState(false);
 
   const [appointments, setAppointments] = useState([]);
@@ -126,11 +140,6 @@ export default function DashboardPage() {
         (!meds || meds.length === 0);
 
       setIsNewUser(noDataYet);
-
-      const storedUser = JSON.parse(localStorage.getItem("user"));
-      if (storedUser?.name) {
-        setUserName(storedUser.name.split(" ")[0]);
-      }
 
       let activity = [];
 
@@ -180,7 +189,7 @@ export default function DashboardPage() {
       a.status !== "cancelled"
   ).length;
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="h-[60vh] flex items-center justify-center">
         <Loader2 className="w-10 h-10 text-teal-500 animate-spin" />
@@ -188,28 +197,32 @@ export default function DashboardPage() {
     );
   }
 
+  const userName = user?.name ? user.name.split(" ")[0] : "User";
+
   return (
-    <div className="space-y-12">
+    <div className="space-y-12 relative overflow-hidden">
+      <ClinicalHologram />
+      
       {/* HEADER */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-8">
-        <div>
+      <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-8 relative z-10">
+        <div className="animate-reveal-up">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-slate-900/10 text-[10px] font-bold uppercase tracking-widest mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
             Live Network Synchronized
           </div>
-          <h1 className="text-4xl md:text-6xl font-syne font-bold tracking-tighter">
+          <h1 className="text-4xl md:text-7xl font-syne font-bold tracking-tighter leading-none">
             {isNewUser
               ? `Welcome, ${userName}.`
               : `Welcome back, ${userName}.`}
           </h1>
-          <p className="text-slate-500 text-lg font-light mt-2">
-            Real-time overview of your health ecosystem and records.
+          <p className="text-slate-500 text-lg font-light mt-4 max-w-xl">
+            Real-time overview of your health ecosystem. System status: <span className="text-emerald-500 font-bold uppercase text-xs tracking-widest">Optimized</span>
           </p>
         </div>
 
         <button
           onClick={() => router.push("/profile")}
-          className="group flex items-center gap-4 p-2 pl-4 pr-6 bg-white border border-slate-900/5 rounded-full hover:border-teal-500 transition-all duration-300"
+          className="group flex items-center gap-4 p-2 pl-4 pr-6 bg-white border border-slate-900/5 rounded-full hover:border-teal-500 transition-all duration-300 shadow-xl shadow-slate-900/5 animate-reveal-up [animation-delay:200ms]"
         >
           <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center transition-colors group-hover:bg-teal-500 group-hover:text-white">
             <User size={20} />
@@ -219,7 +232,7 @@ export default function DashboardPage() {
       </div>
 
       {/* STATS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
         <DashboardCard
           title="Scheduled Visists"
           value={upcomingAppointments}
@@ -253,17 +266,17 @@ export default function DashboardPage() {
       </div>
 
       {/* RECENT ACTIVITY & SYSTEM LOGS */}
-      <div className="grid lg:grid-cols-12 gap-10">
+      <div className="grid lg:grid-cols-12 gap-10 relative z-10">
         <div className="lg:col-span-8 bg-white rounded-[2.5rem] border border-slate-900/5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden">
-          <div className="p-10 border-b border-slate-900/5 flex justify-between items-center">
+          <div className="p-10 border-b border-slate-900/5 flex justify-between items-center bg-slate-50/30">
             <div>
               <h2 className="text-2xl font-syne font-bold tracking-tight">System Logs</h2>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mt-1">
                 Recent Health Activity & Updates
               </p>
             </div>
-            <button className="p-3 bg-slate-50 rounded-2xl text-slate-400 hover:text-slate-900 transition-colors">
-              <Plus size={20} />
+            <button className="p-3 bg-white border border-slate-900/5 rounded-2xl text-slate-400 hover:text-teal-500 transition-all shadow-sm">
+              <Zap size={20} />
             </button>
           </div>
           <div className="p-4 space-y-1">
@@ -273,7 +286,7 @@ export default function DashboardPage() {
               ))
             ) : (
               <div className="py-20 text-center">
-                <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-dashed border-slate-900/10">
                   <Activity size={24} className="text-slate-200" />
                 </div>
                 <p className="text-sm font-bold uppercase tracking-widest text-slate-300">
@@ -292,32 +305,35 @@ export default function DashboardPage() {
         </div>
 
         <div className="lg:col-span-4 space-y-6">
-          <div className="bg-slate-900 text-white rounded-[2.5rem] p-10 relative overflow-hidden group">
+          <div className="bg-slate-900 text-white rounded-[2.5rem] p-10 relative overflow-hidden group shadow-2xl shadow-slate-900/20">
             <div className="relative z-10">
-              <h3 className="text-2xl font-syne font-bold mb-4">Clinical Support</h3>
-              <p className="text-slate-400 text-sm leading-relaxed mb-8">
+              <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mb-8 border border-white/5">
+                <Shield size={24} className="text-teal-500" />
+              </div>
+              <h3 className="text-2xl font-syne font-bold mb-4 tracking-tight">Clinical Support</h3>
+              <p className="text-slate-400 text-sm leading-relaxed mb-8 font-light">
                 Need assistance with your records? Our medical orchestration team is available 24/7.
               </p>
-              <button className="w-full py-4 bg-teal-500 text-slate-900 rounded-2xl font-bold uppercase tracking-widest text-xs hover:bg-white transition-all duration-300">
+              <button className="w-full py-5 bg-teal-500 text-slate-900 rounded-2xl font-bold uppercase tracking-widest text-xs hover:bg-white transition-all duration-500 shadow-lg shadow-teal-500/20">
                 Contact Support
               </button>
             </div>
-            <div className="absolute bottom-[-10%] right-[-10%] w-32 h-32 bg-teal-500/10 rounded-full blur-3xl group-hover:bg-teal-500/20 transition-colors duration-700" />
+            <div className="absolute top-[-20%] right-[-20%] w-64 h-64 bg-teal-500/10 rounded-full blur-3xl group-hover:bg-teal-500/20 transition-colors duration-700" />
           </div>
 
           <div className="bg-white rounded-[2.5rem] p-10 border border-slate-900/5 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
-            <h3 className="text-lg font-syne font-bold mb-6">Network Nodes</h3>
-            <div className="space-y-6">
+            <h3 className="text-lg font-syne font-bold mb-8 tracking-tight">Network Nodes</h3>
+            <div className="space-y-8">
               {[
                 { label: "Main Database", status: "Operational" },
                 { label: "Secure Vault", status: "Encrypted" },
                 { label: "Sync Engine", status: "Active" }
               ].map((node, i) => (
-                <div key={i} className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-slate-500">{node.label}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-teal-500" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest">{node.status}</span>
+                <div key={i} className="flex justify-between items-center group/node">
+                  <span className="text-sm font-medium text-slate-500 transition-colors group-hover/node:text-slate-900">{node.label}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-900">{node.status}</span>
                   </div>
                 </div>
               ))}
@@ -328,3 +344,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+

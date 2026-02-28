@@ -367,126 +367,128 @@ export default function EnhancedReportsPage() {
       {/* UPLOAD MODAL */}
       {showUploadModal && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[100] px-6 py-12">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-2xl p-10 md:p-16 border border-slate-900/5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] animate-reveal-up overflow-y-auto max-h-full relative">
+          <div className="bg-white rounded-[2.5rem] w-full max-w-2xl border border-slate-900/5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] animate-reveal-up overflow-hidden max-h-full relative flex flex-col">
             <button 
               onClick={() => setShowUploadModal(false)}
-              className="absolute top-8 right-8 p-3 bg-slate-50 rounded-2xl text-slate-400 hover:text-slate-900 transition-colors"
+              className="absolute top-8 right-8 p-3 bg-slate-50 rounded-2xl text-slate-400 hover:text-slate-900 transition-colors z-20"
             >
               <X size={20} />
             </button>
 
-            <div className="mb-12">
-              <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-teal-600 mb-4">Secure Ingestion</div>
-              <h2 className="text-4xl font-syne font-bold tracking-tighter">Register Record.</h2>
+            <div className="overflow-y-auto p-10 md:p-16 h-full">
+              <div className="mb-12">
+                <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-teal-600 mb-4">Secure Ingestion</div>
+                <h2 className="text-4xl font-syne font-bold tracking-tighter">Register Record.</h2>
+              </div>
+
+              <form onSubmit={handleUpload} className="space-y-8">
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Classification Name</label>
+                    <input
+                      required
+                      value={uploadData.name}
+                      onChange={(e) => setUploadData({ ...uploadData, name: e.target.value })}
+                      placeholder="e.g. Annual Blood Work"
+                      className="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-medium"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Category</label>
+                    <select
+                      required
+                      value={uploadData.category}
+                      onChange={(e) => setUploadData({ ...uploadData, category: e.target.value })}
+                      className="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-bold text-xs uppercase tracking-widest cursor-pointer"
+                    >
+                      <option value="">Select Category</option>
+                      <option value="lab">Lab Tests</option>
+                      <option value="imaging">Imaging</option>
+                      <option value="pathology">Pathology</option>
+                      <option value="cardiology">Cardiology</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Responsible Practitioner</label>
+                    <input
+                      required
+                      value={uploadData.doctor}
+                      onChange={(e) => setFormData ? null : setUploadData({ ...uploadData, doctor: e.target.value })}
+                      placeholder="Dr. Elena Rossi"
+                      className="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-medium"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Examination Date</label>
+                    <input
+                      type="date"
+                      required
+                      value={uploadData.date}
+                      onChange={(e) => setUploadData({ ...uploadData, date: e.target.value })}
+                      className="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-medium"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Document Binary</label>
+                  <div className="relative">
+                    <input
+                      type="file"
+                      required
+                      onChange={(e) => setUploadData({ ...uploadData, file: e.target.files[0] })}
+                      className="hidden"
+                      id="file-upload"
+                      accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                    />
+                    <label 
+                      htmlFor="file-upload"
+                      className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-slate-900/10 rounded-2xl bg-slate-50 hover:bg-white hover:border-teal-500 transition-all cursor-pointer group"
+                    >
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <Upload className="w-8 h-8 text-slate-300 group-hover:text-teal-500 transition-colors mb-4" />
+                        <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
+                          {uploadData.file ? uploadData.file.name : "Select or Drop Clinical File"}
+                        </p>
+                        <p className="text-[8px] font-bold uppercase tracking-widest text-slate-300 mt-2">PDF, JPG, PNG (Max 10MB)</p>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Clinical Annotations</label>
+                  <textarea
+                    value={uploadData.description}
+                    onChange={(e) => setUploadData({ ...uploadData, description: e.target.value })}
+                    rows={3}
+                    placeholder="Summary of results or specialist notes..."
+                    className="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-medium resize-none"
+                  />
+                </div>
+
+                <div className="pt-6">
+                  <button
+                    disabled={uploading}
+                    type="submit"
+                    className="w-full bg-slate-900 text-white py-5 rounded-[1.25rem] hover:bg-teal-600 transition-all duration-300 font-bold text-lg flex items-center justify-center gap-3 group"
+                  >
+                    {uploading ? (
+                      <Loader2 className="w-6 h-6 animate-spin" />
+                    ) : (
+                      <>
+                        <span>Commit to Vault</span>
+                        <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
             </div>
-
-            <form onSubmit={handleUpload} className="space-y-8">
-              <div className="grid md:grid-cols-2 gap-8">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Classification Name</label>
-                  <input
-                    required
-                    value={uploadData.name}
-                    onChange={(e) => setUploadData({ ...uploadData, name: e.target.value })}
-                    placeholder="e.g. Annual Blood Work"
-                    className="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-medium"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Category</label>
-                  <select
-                    required
-                    value={uploadData.category}
-                    onChange={(e) => setUploadData({ ...uploadData, category: e.target.value })}
-                    className="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-bold text-xs uppercase tracking-widest cursor-pointer"
-                  >
-                    <option value="">Select Category</option>
-                    <option value="lab">Lab Tests</option>
-                    <option value="imaging">Imaging</option>
-                    <option value="pathology">Pathology</option>
-                    <option value="cardiology">Cardiology</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-8">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Responsible Practitioner</label>
-                  <input
-                    required
-                    value={uploadData.doctor}
-                    onChange={(e) => setFormData ? null : setUploadData({ ...uploadData, doctor: e.target.value })}
-                    placeholder="Dr. Elena Rossi"
-                    className="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-medium"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Examination Date</label>
-                  <input
-                    type="date"
-                    required
-                    value={uploadData.date}
-                    onChange={(e) => setUploadData({ ...uploadData, date: e.target.value })}
-                    className="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-medium"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Document Binary</label>
-                <div className="relative">
-                  <input
-                    type="file"
-                    required
-                    onChange={(e) => setUploadData({ ...uploadData, file: e.target.files[0] })}
-                    className="hidden"
-                    id="file-upload"
-                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                  />
-                  <label 
-                    htmlFor="file-upload"
-                    className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-slate-900/10 rounded-2xl bg-slate-50 hover:bg-white hover:border-teal-500 transition-all cursor-pointer group"
-                  >
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <Upload className="w-8 h-8 text-slate-300 group-hover:text-teal-500 transition-colors mb-4" />
-                      <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
-                        {uploadData.file ? uploadData.file.name : "Select or Drop Clinical File"}
-                      </p>
-                      <p className="text-[8px] font-bold uppercase tracking-widest text-slate-300 mt-2">PDF, JPG, PNG (Max 10MB)</p>
-                    </div>
-                  </label>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Clinical Annotations</label>
-                <textarea
-                  value={uploadData.description}
-                  onChange={(e) => setUploadData({ ...uploadData, description: e.target.value })}
-                  rows={3}
-                  placeholder="Summary of results or specialist notes..."
-                  className="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-medium resize-none"
-                />
-              </div>
-
-              <div className="pt-6">
-                <button
-                  disabled={uploading}
-                  type="submit"
-                  className="w-full bg-slate-900 text-white py-5 rounded-[1.25rem] hover:bg-teal-600 transition-all duration-300 font-bold text-lg flex items-center justify-center gap-3 group"
-                >
-                  {uploading ? (
-                    <Loader2 className="w-6 h-6 animate-spin" />
-                  ) : (
-                    <>
-                      <span>Commit to Vault</span>
-                      <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}

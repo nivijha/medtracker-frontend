@@ -311,95 +311,97 @@ export default function AppointmentsPage() {
       {/* MODALS */}
       {(showAddModal || showRescheduleModal) && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[100] px-6 py-12">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-2xl p-10 md:p-16 border border-slate-900/5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] animate-reveal-up overflow-y-auto max-h-full relative">
+          <div className="bg-white rounded-[2.5rem] w-full max-w-2xl border border-slate-900/5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] animate-reveal-up overflow-hidden max-h-full relative flex flex-col">
             <button 
               onClick={() => { setShowAddModal(false); setShowRescheduleModal(false); }}
-              className="absolute top-8 right-8 p-3 bg-slate-50 rounded-2xl text-slate-400 hover:text-slate-900 transition-colors"
+              className="absolute top-8 right-8 p-3 bg-slate-50 rounded-2xl text-slate-400 hover:text-slate-900 transition-colors z-20"
             >
               <X size={20} />
             </button>
 
-            <div className="mb-12">
-              <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-teal-600 mb-4">Protocol Entry</div>
-              <h2 className="text-4xl font-syne font-bold tracking-tighter">
-                {showAddModal ? "Initialize Consultation." : "Modify Schedule."}
-              </h2>
+            <div className="overflow-y-auto p-10 md:p-16 h-full">
+              <div className="mb-12">
+                <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-teal-600 mb-4">Protocol Entry</div>
+                <h2 className="text-4xl font-syne font-bold tracking-tighter">
+                  {showAddModal ? "Initialize Consultation." : "Modify Schedule."}
+                </h2>
+              </div>
+
+              <form onSubmit={(e) => { e.preventDefault(); showAddModal ? handleAddAppointment(e) : confirmReschedule(); }} className="space-y-8">
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Practitioner Name</label>
+                    <input
+                      required
+                      value={formData.doctorName}
+                      onChange={(e) => setFormData({ ...formData, doctorName: e.target.value })}
+                      placeholder="Dr. Alexander Wright"
+                      className="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-medium"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Specialty</label>
+                    <input
+                      value={formData.specialty}
+                      onChange={(e) => setFormData({ ...formData, specialty: e.target.value })}
+                      placeholder="e.g. Cardiology"
+                      className="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-medium"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Clinical Facility</label>
+                  <input
+                    required
+                    value={formData.hospital}
+                    onChange={(e) => setFormData({ ...formData, hospital: e.target.value })}
+                    placeholder="St. Mary's Medical Center"
+                    className="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-medium"
+                  />
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Date Selection</label>
+                    <input
+                      type="date"
+                      required
+                      value={formData.date}
+                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                      className="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-medium"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Time Slot</label>
+                    <input
+                      type="time"
+                      required
+                      value={formData.time}
+                      onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                      className="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-medium"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-6">
+                  <button
+                    disabled={isSaving}
+                    type="submit"
+                    className="w-full bg-slate-900 text-white py-5 rounded-[1.25rem] hover:bg-teal-600 transition-all duration-300 font-bold text-lg flex items-center justify-center gap-3 group"
+                  >
+                    {isSaving ? (
+                      <Loader2 className="w-6 h-6 animate-spin" />
+                    ) : (
+                      <>
+                        <span>{showAddModal ? "Commit Schedule" : "Confirm Modification"}</span>
+                        <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
             </div>
-
-            <form onSubmit={(e) => { e.preventDefault(); showAddModal ? handleAddAppointment(e) : confirmReschedule(); }} className="space-y-8">
-              <div className="grid md:grid-cols-2 gap-8">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Practitioner Name</label>
-                  <input
-                    required
-                    value={formData.doctorName}
-                    onChange={(e) => setFormData({ ...formData, doctorName: e.target.value })}
-                    placeholder="Dr. Alexander Wright"
-                    className="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-medium"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Specialty</label>
-                  <input
-                    value={formData.specialty}
-                    onChange={(e) => setFormData({ ...formData, specialty: e.target.value })}
-                    placeholder="e.g. Cardiology"
-                    className="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-medium"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Clinical Facility</label>
-                <input
-                  required
-                  value={formData.hospital}
-                  onChange={(e) => setFormData({ ...formData, hospital: e.target.value })}
-                  placeholder="St. Mary's Medical Center"
-                  className="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-medium"
-                />
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-8">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Date Selection</label>
-                  <input
-                    type="date"
-                    required
-                    value={formData.date}
-                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-medium"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Time Slot</label>
-                  <input
-                    type="time"
-                    required
-                    value={formData.time}
-                    onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                    className="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-medium"
-                  />
-                </div>
-              </div>
-
-              <div className="pt-6">
-                <button
-                  disabled={isSaving}
-                  type="submit"
-                  className="w-full bg-slate-900 text-white py-5 rounded-[1.25rem] hover:bg-teal-600 transition-all duration-300 font-bold text-lg flex items-center justify-center gap-3 group"
-                >
-                  {isSaving ? (
-                    <Loader2 className="w-6 h-6 animate-spin" />
-                  ) : (
-                    <>
-                      <span>{showAddModal ? "Commit Schedule" : "Confirm Modification"}</span>
-                      <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}

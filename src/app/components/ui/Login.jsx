@@ -106,7 +106,7 @@ export default function Login() {
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
-                        placeholder="John Doe"
+                        placeholder="Full Name"
                         className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-medium"
                         required
                       />
@@ -121,7 +121,7 @@ export default function Login() {
                         name="phone"
                         value={formData.phone}
                         onChange={handleChange}
-                        placeholder="+1 234 567 890"
+                        placeholder="+91 987 654 3210"
                         className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-medium"
                         required
                       />

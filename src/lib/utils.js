@@ -5,14 +5,19 @@ const API = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000",
   withCredentials: true,
 });
-API.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // If we are not already on the login page, redirect
+      if (typeof window !== "undefined" && !window.location.pathname.includes("/login")) {
+         window.location.href = "/login";
+      }
+    }
+    return Promise.reject(error);
   }
-  return config;
-});
+);
 
 /* ================== AUTH APIs ================== */
 export const registerUser = async (name, email, phone, password) => {
@@ -76,6 +81,23 @@ export const uploadReport = async (formData) => {
 
 export const deleteReport = async (reportId) => {
   const res = await API.delete(`/api/reports/${reportId}`);
+  return res.data;
+};
+
+/* ================== TEST APIs ================== */
+
+export const getTests = async () => {
+  const res = await API.get("/api/tests/my");
+  return res.data || [];
+};
+
+export const recordTest = async (testData) => {
+  const res = await API.post("/api/tests", testData);
+  return res.data.test;
+};
+
+export const deleteTest = async (id) => {
+  const res = await API.delete(`/api/tests/${id}`);
   return res.data;
 };
 

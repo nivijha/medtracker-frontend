@@ -2,44 +2,41 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import {
   LogOut,
-  User,
-  FileText,
   LayoutDashboard,
   Menu,
   Activity,
   X,
   Calendar,
   Plus,
-  ArrowUpRight
+  ArrowUpRight,
+  FileText
 } from "lucide-react";
 
 export default function LoggedInNavbar() {
-  const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState(null);
+  const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
-
-    if (typeof window !== "undefined") {
-      const userData = JSON.parse(localStorage.getItem("user"));
-      if (userData) setUser(userData);
-    }
-
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    document.cookie = "token=; path=/; max-age=0;";
-    router.push("/login");
+  const handleLogoutClick = () => {
+    setShowLogoutConfirm(true);
+    setMenuOpen(false);
+  };
+
+  const confirmLogout = () => {
+    logout();
+    setShowLogoutConfirm(false);
   };
 
   const isActive = (path) => pathname === path;
@@ -80,8 +77,8 @@ export default function LoggedInNavbar() {
         <div className="flex items-center gap-6">
           <div className="hidden sm:flex items-center gap-4">
             {user && (
-              <button
-                onClick={() => router.push("/profile")}
+              <Link
+                href="/profile"
                 className="flex items-center gap-3 pl-2 pr-4 py-2 bg-white border border-slate-900/5 rounded-full hover:border-teal-500 transition-colors group"
               >
                 <div className="w-8 h-8 flex items-center justify-center bg-slate-100 text-slate-900 rounded-full font-bold text-xs uppercase group-hover:bg-teal-500 group-hover:text-white transition-colors">
@@ -91,11 +88,11 @@ export default function LoggedInNavbar() {
                   <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 leading-none">Profile</div>
                   <div className="text-xs font-bold text-slate-900">{user.name.split(" ")[0]}</div>
                 </div>
-              </button>
+              </Link>
             )}
 
             <button
-              onClick={handleLogout}
+              onClick={handleLogoutClick}
               className="p-3 text-slate-400 hover:text-red-500 transition-colors"
               title="Logout"
             >
@@ -146,12 +143,39 @@ export default function LoggedInNavbar() {
             )}
             
             <button
-              onClick={handleLogout}
+              onClick={handleLogoutClick}
               className="flex items-center justify-between w-full p-6 bg-red-50 text-red-600 rounded-3xl font-bold uppercase tracking-widest text-sm"
             >
               <span>Terminate Session</span>
               <LogOut size={20} />
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* LOGOUT CONFIRMATION MODAL */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[110] px-6">
+          <div className="bg-white rounded-[2.5rem] w-full max-w-md p-10 md:p-12 border border-slate-900/5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] animate-reveal-up relative">
+            <h3 className="text-2xl font-syne font-bold text-slate-900 mb-4 tracking-tight">Terminate Session?</h3>
+            <p className="text-slate-500 font-light leading-relaxed mb-10">
+              Are you sure you want to end your current clinical session? You will need to re-authenticate to access your health data.
+            </p>
+
+            <div className="flex gap-4">
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="flex-1 py-4 rounded-2xl border border-slate-900/10 font-bold uppercase tracking-widest text-[10px] hover:bg-slate-50 transition-colors"
+              >
+                Stay Logged In
+              </button>
+              <button
+                onClick={confirmLogout}
+                className="flex-1 py-4 rounded-2xl bg-red-500 text-white font-bold uppercase tracking-widest text-[10px] hover:bg-red-600 transition-all shadow-lg shadow-red-500/20"
+              >
+                Confirm Logout
+              </button>
+            </div>
           </div>
         </div>
       )}

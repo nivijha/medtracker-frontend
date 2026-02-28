@@ -23,14 +23,14 @@ import { getProfile, getHealthSummary } from "@/lib/utils";
 
 /* ================= SMALL UI COMPONENTS ================= */
 
-const StatCard = ({ icon: Icon, label, value, accent = "slate" }) => {
+const StatCard = ({ icon: Icon, label, value, accent = "slate", tooltip }) => {
   const accentStyles = {
     teal: "text-teal-500 bg-teal-500/10",
     slate: "text-slate-900 bg-slate-100",
   };
 
   return (
-    <div className="group p-8 bg-white rounded-[2rem] border border-slate-900/5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] transition-all duration-500 overflow-hidden relative">
+    <div className="group p-8 bg-white rounded-[2rem] border border-slate-900/5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] transition-all duration-500 overflow-visible relative">
       <div className={`p-4 rounded-2xl w-fit mb-8 transition-transform group-hover:scale-110 duration-500 ${accentStyles[accent] || accentStyles.slate}`}>
         <Icon className="w-6 h-6" />
       </div>
@@ -39,6 +39,14 @@ const StatCard = ({ icon: Icon, label, value, accent = "slate" }) => {
         <p className="text-4xl font-syne font-bold text-slate-900 tracking-tighter">{value}</p>
       </div>
       <div className="absolute bottom-0 right-0 w-24 h-24 bg-slate-50 rounded-tl-[4rem] -z-0 opacity-50 group-hover:bg-teal-50 transition-colors duration-500" />
+      
+      {tooltip && (
+        <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300 bottom-full left-1/2 -translate-x-1/2 mb-4 w-48 p-4 bg-slate-900 text-white text-xs rounded-xl shadow-xl pointer-events-none z-50">
+          <div className="font-bold mb-2 border-b border-white/10 pb-1">Calculation</div>
+          {tooltip}
+          <div className="absolute bottom-[-6px] left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-900 rotate-45"></div>
+        </div>
+      )}
     </div>
   );
 };
@@ -184,6 +192,15 @@ export default function ProfilePage() {
               label="Wellness Coeff."
               value={`${summary.wellnessScore}%`}
               accent="teal"
+              tooltip={
+                <div className="space-y-1">
+                  <div className="flex justify-between"><span>Base Metric</span> <span>40%</span></div>
+                  <div className="flex justify-between"><span>Profile Data</span> <span>+10%</span></div>
+                  <div className="flex justify-between"><span>Health Records</span> <span>+15%</span></div>
+                  <div className="flex justify-between"><span>Appointments</span> <span>+15%</span></div>
+                  <div className="flex justify-between"><span>Active Protocols</span> <span>+10%</span></div>
+                </div>
+              }
             />
           </div>
         ) : (

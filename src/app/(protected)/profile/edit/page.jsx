@@ -213,9 +213,9 @@ export default function EditProfilePage() {
             </div>
 
             <div className="grid md:grid-cols-2 gap-8">
-              <Input label="Legal Name" icon={User} value={form.name} onChange={(v) => updateField("name", v)} placeholder="John Doe" />
+              <Input label="Legal Name" icon={User} value={form.name} onChange={(v) => updateField("name", v)} placeholder="Full Name" />
               <Input label="Secure Email" icon={Mail} value={form.email} onChange={(v) => updateField("email", v)} placeholder="protocol@medtracker.io" />
-              <Input label="Contact Terminal" icon={Phone} value={form.phone} onChange={(v) => updateField("phone", v)} placeholder="+1 234 567 890" />
+              <Input label="Contact Terminal" icon={Phone} value={form.phone} onChange={(v) => updateField("phone", v)} placeholder="+91 987 654 3210" />
               <Input label="Geographic Node" icon={MapPin} value={form.address} onChange={(v) => updateField("address", v)} placeholder="Global Citizen" />
             </div>
           </div>
