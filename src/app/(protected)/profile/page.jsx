@@ -12,42 +12,46 @@ import {
   Heart,
   Calendar,
   Edit,
+  Plus,
+  ArrowRight,
+  Shield,
+  Loader2,
+  ChevronRight
 } from "lucide-react";
 import Link from "next/link";
 import { getProfile, getHealthSummary } from "@/lib/utils";
 
 /* ================= SMALL UI COMPONENTS ================= */
 
-const StatCard = ({ icon: Icon, label, value, color }) => {
-  const colors = {
-    blue: "bg-blue-50 text-blue-600",
-    green: "bg-green-50 text-green-600",
-    purple: "bg-purple-50 text-purple-600",
-    orange: "bg-orange-50 text-orange-600",
+const StatCard = ({ icon: Icon, label, value, accent = "slate" }) => {
+  const accentStyles = {
+    teal: "text-teal-500 bg-teal-500/10",
+    slate: "text-slate-900 bg-slate-100",
   };
 
   return (
-    <div className="bg-white rounded-xl border p-5 shadow-sm text-center sm:text-left">
-      <div
-        className={`inline-flex p-3 rounded-lg ${colors[color]} mb-3 mx-auto sm:mx-0`}
-      >
+    <div className="group p-8 bg-white rounded-[2rem] border border-slate-900/5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] transition-all duration-500 overflow-hidden relative">
+      <div className={`p-4 rounded-2xl w-fit mb-8 transition-transform group-hover:scale-110 duration-500 ${accentStyles[accent] || accentStyles.slate}`}>
         <Icon className="w-6 h-6" />
       </div>
-      <p className="text-2xl font-bold">{value}</p>
-      <p className="text-sm text-gray-600">{label}</p>
+      <div className="relative z-10">
+        <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-2">{label}</h3>
+        <p className="text-4xl font-syne font-bold text-slate-900 tracking-tighter">{value}</p>
+      </div>
+      <div className="absolute bottom-0 right-0 w-24 h-24 bg-slate-50 rounded-tl-[4rem] -z-0 opacity-50 group-hover:bg-teal-50 transition-colors duration-500" />
     </div>
   );
 };
 
 const InfoRow = ({ icon: Icon, label, value }) => (
-  <div className="flex gap-4 p-4 bg-gray-50 rounded-lg items-start">
-    <div className="p-2 bg-white rounded-lg">
-      <Icon className="w-5 h-5 text-gray-600" />
+  <div className="flex gap-6 p-8 bg-white rounded-[2rem] border border-slate-900/5 items-center group hover:border-teal-500/20 transition-all duration-300">
+    <div className="p-4 bg-slate-50 rounded-2xl group-hover:bg-teal-500/10 group-hover:text-teal-600 transition-colors duration-300">
+      <Icon className="w-6 h-6 text-slate-400 group-hover:text-teal-600" />
     </div>
     <div>
-      <p className="text-sm text-gray-600">{label}</p>
-      <p className="font-medium break-words">
-        {value || "Not provided"}
+      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">{label}</p>
+      <p className="text-lg font-bold text-slate-900 break-words tracking-tight">
+        {value || "Protocol Undefined"}
       </p>
     </div>
   </div>
@@ -81,109 +85,144 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      <div className="h-[60vh] flex items-center justify-center">
+        <Loader2 className="w-10 h-10 text-teal-500 animate-spin" />
       </div>
     );
   }
 
   if (!user) return null;
 
-  const memberSince = new Date(user.createdAt).toLocaleDateString("en-US", {
+  const memberSince = new Date(user.createdAt).toLocaleDateString("en-IN", {
     month: "long",
     year: "numeric",
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 sm:px-6 py-6">
-      <div className="max-w-6xl mx-auto space-y-6">
-
-        {/* HEADER */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-6 sm:p-8 text-white">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-6">
-
-            <div className="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
+    <div className="space-y-12 animate-reveal-up">
+      {/* HEADER SECTION */}
+      <div className="relative bg-slate-900 rounded-[3rem] md:rounded-[4rem] p-10 md:p-20 text-white overflow-hidden group">
+        <div className="relative z-10 flex flex-col lg:flex-row lg:justify-between lg:items-center gap-10">
+          <div className="flex flex-col md:flex-row items-center gap-10 text-center md:text-left">
+            <div className="relative">
               {user.profileImage ? (
                 <img
                   src={user.profileImage}
-                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-4 border-white shadow"
+                  className="w-32 h-32 md:w-40 md:h-40 rounded-[3rem] object-cover border-4 border-white/10 shadow-2xl transition-transform duration-700 group-hover:scale-105"
                 />
               ) : (
-                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white text-blue-600 flex items-center justify-center text-2xl sm:text-3xl font-bold">
+                <div className="w-32 h-32 md:w-40 md:h-40 rounded-[3rem] bg-teal-500 text-slate-900 flex items-center justify-center text-4xl md:text-5xl font-syne font-black border-4 border-white/10 shadow-2xl">
                   {user.name?.[0]}
                 </div>
               )}
-
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold">
-                  {user.name}
-                </h1>
-                <p className="text-blue-100 text-sm sm:text-base">
-                  {user.email}
-                </p>
-                <p className="text-xs sm:text-sm flex items-center justify-center sm:justify-start gap-1 mt-1">
-                  <Clock className="w-4 h-4" />
-                  Member since {memberSince}
-                </p>
+              <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-white rounded-2xl flex items-center justify-center text-slate-900 shadow-xl border-4 border-slate-900">
+                <Shield size={16} className="text-teal-500" />
               </div>
             </div>
 
-            {/* EDIT BUTTON */}
-            <Link
-              href="/profile/edit"
-              className="bg-white text-blue-600 px-4 py-2 rounded-lg flex items-center justify-center gap-2 w-full sm:w-auto"
-            >
-              <Edit className="w-4 h-4" /> Edit Profile
-            </Link>
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-[10px] font-bold uppercase tracking-widest mb-4">
+                <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
+                Verified Clinical Profile
+              </div>
+              <h1 className="text-4xl md:text-6xl font-syne font-bold tracking-tighter mb-2">
+                {user.name}.
+              </h1>
+              <p className="text-slate-400 text-lg font-light">
+                {user.email}
+              </p>
+              <div className="flex items-center justify-center md:justify-start gap-4 mt-6">
+                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-teal-500 bg-teal-500/10 px-4 py-2 rounded-full border border-teal-500/20">
+                  <Clock size={12} />
+                  Initiated {memberSince}
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* STATS */}
-        {summary && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Link
+            href="/profile/edit"
+            className="group/btn bg-white text-slate-900 px-10 py-5 rounded-full font-bold text-sm uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-teal-500 hover:text-slate-900 transition-all duration-300 shadow-xl"
+          >
+            <span>Modify Identity</span>
+            <Edit size={16} className="transition-transform group-hover/btn:rotate-12" />
+          </Link>
+        </div>
+        
+        {/* Decorative elements */}
+        <div className="absolute top-[-20%] right-[-10%] w-[40%] aspect-square rounded-full bg-teal-500/5 blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-[-20%] left-[-10%] w-[30%] aspect-square rounded-full bg-white/5 blur-[100px] pointer-events-none" />
+      </div>
+
+      {/* METRICS SECTION */}
+      <div className="space-y-8">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-syne font-bold tracking-tight">Clinical Metrics.</h2>
+          <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Activity Synchronized</div>
+        </div>
+        
+        {summary ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <StatCard
               icon={Calendar}
-              label="Appointments"
+              label="Consultations"
               value={summary.appointments}
-              color="blue"
             />
             <StatCard
               icon={FileText}
-              label="Reports"
+              label="Vault Records"
               value={summary.reports}
-              color="green"
+              accent="teal"
             />
             <StatCard
               icon={Activity}
-              label="Medications"
+              label="Active Protocols"
               value={summary.activeMedications}
-              color="purple"
             />
             <StatCard
               icon={Heart}
-              label="Wellness Score"
+              label="Wellness Coeff."
               value={`${summary.wellnessScore}%`}
-              color="orange"
+              accent="teal"
             />
           </div>
+        ) : (
+          <div className="py-20 text-center bg-white rounded-[3rem] border border-dashed border-slate-900/10">
+            <Loader2 size={32} className="text-slate-200 animate-spin mx-auto mb-4" />
+            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Recalculating Metrics...</p>
+          </div>
         )}
+        
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center md:text-left px-4">
+          Clinical data aggregation based on your real-time health orchestration.
+        </p>
+      </div>
 
-        {summary && (
-          <p className="text-xs text-gray-500 text-center sm:text-left">
-            Based on your care tracking activity
-          </p>
-        )}
-
-        {/* PERSONAL INFO */}
-        <div className="bg-white rounded-xl border p-5 sm:p-6 space-y-4">
-          <h2 className="text-lg font-semibold">
-            Personal Information
-          </h2>
-
-          <InfoRow icon={User} label="Full Name" value={user.name} />
-          <InfoRow icon={Mail} label="Email" value={user.email} />
-          <InfoRow icon={Phone} label="Phone" value={user.phone} />
-          <InfoRow icon={MapPin} label="Address" value={user.address} />
+      {/* PERSONAL DATA SECTION */}
+      <div className="space-y-8">
+        <h2 className="text-2xl font-syne font-bold tracking-tight">Personal Parameters.</h2>
+        <div className="grid md:grid-cols-2 gap-6">
+          <InfoRow icon={User} label="Legal Name" value={user.name} />
+          <InfoRow icon={Mail} label="Secure Email" value={user.email} />
+          <InfoRow icon={Phone} label="Contact Terminal" value={user.phone} />
+          <InfoRow icon={MapPin} label="Geographic Node" value={user.address} />
+        </div>
+      </div>
+      
+      {/* SECURITY STATUS */}
+      <div className="bg-white rounded-[3rem] p-10 md:p-16 border border-slate-900/5 flex flex-col md:flex-row items-center justify-between gap-10">
+        <div className="flex items-center gap-8">
+          <div className="w-20 h-20 bg-slate-900 rounded-[2rem] flex items-center justify-center text-teal-500 shadow-2xl">
+            <Shield size={32} />
+          </div>
+          <div>
+            <h3 className="text-2xl font-syne font-bold text-slate-900 tracking-tight">System Integrity</h3>
+            <p className="text-slate-500 font-light text-sm mt-1">Your data is protected by clinical-grade end-to-end encryption protocols.</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 px-6 py-3 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-bold uppercase tracking-widest border border-emerald-100">
+          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          Active Shield
         </div>
       </div>
     </div>

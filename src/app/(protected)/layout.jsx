@@ -1,31 +1,35 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import LoggedInNavbar from "../components/ui/LoggedInNavbar";
-import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import { Loader2 } from "lucide-react";
 
 export default function ProtectedLayout({ children }) {
-  const router = useRouter();
+  const { loading } = useAuth();
 
-  useEffect(() => {
-    // Basic client-side auth check
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.push("/login");
-    }
-  }, [router]);
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-10 h-10 text-teal-500 animate-spin" />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Global Navbar */}
+    <div className="min-h-screen bg-background text-slate-900 bg-grain flex flex-col selection:bg-teal-500/30">
       <LoggedInNavbar />
 
-      {/* Main content */}
-      <main className="flex-1 px-4 sm:px-6 py-4 sm:py-6 mt-2 sm:mt-4">
-        <div className="max-w-7xl mx-auto w-full">
+      <main className="flex-1 px-6 md:px-12 py-10 md:py-16">
+        <div className="max-w-screen-2xl mx-auto w-full animate-reveal-up">
           {children}
         </div>
       </main>
+      
+      <div className="py-8 px-12 border-t border-slate-900/5 text-[10px] uppercase tracking-widest font-bold text-slate-400 flex justify-between items-center">
+        <span>MedTracker Protocol v1.0</span>
+        <span>Secure Session Active</span>
+      </div>
     </div>
   );
 }

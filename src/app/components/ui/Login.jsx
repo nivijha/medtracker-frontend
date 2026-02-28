@@ -1,13 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { Heart, Mail, Lock, Eye, EyeOff, User, Phone } from "lucide-react";
+import { Heart, Mail, Lock, Eye, EyeOff, User, Phone, Plus, ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { registerUser, loginUser } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Login() {
-  const router = useRouter();
+  const { login, register } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -33,13 +32,9 @@ export default function Login() {
     setLoading(true);
 
     try {
-      let data;
-
       if (isLogin) {
-        // LOGIN (no phone)
-        data = await loginUser(formData.email, formData.password);
+        await login(formData.email, formData.password);
       } else {
-        // SIGNUP (phone required)
         if (formData.password !== formData.confirmPassword) {
           setError("Passwords do not match");
           setLoading(false);
@@ -52,17 +47,13 @@ export default function Login() {
           return;
         }
 
-        data = await registerUser(
+        await register(
           formData.name,
           formData.email,
           formData.phone,
           formData.password
         );
       }
-
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-      router.push("/dashboard");
     } catch (err) {
       console.error(err);
       const apiError = err.response?.data;
@@ -78,182 +69,163 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center px-4 py-12">
-      <div className="max-w-md w-full">
-        <Link href="/" className="flex items-center justify-center mb-8">
-          <Heart className="w-10 h-10 text-blue-600" />
-          <span className="ml-2 text-3xl font-bold text-blue-600">
-            MedTracker
-          </span>
+    <div className="min-h-screen bg-background text-slate-900 bg-grain flex items-center justify-center px-6 py-12">
+      <div className="max-w-xl w-full">
+        <Link href="/" className="flex items-center gap-2 justify-center mb-12 group">
+          <div className="w-10 h-10 bg-slate-900 rounded-full flex items-center justify-center transition-transform group-hover:rotate-12">
+            <Plus className="text-teal-500 w-6 h-6" />
+          </div>
+          <span className="text-3xl font-syne font-bold tracking-tight">MedTracker</span>
         </Link>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-          {/* Toggle Buttons */}
-          <div className="flex bg-gray-100 rounded-lg p-1 mb-8">
-            <button
-              onClick={() => setIsLogin(true)}
-              className={`flex-1 py-2 rounded-lg font-medium transition ${
-                isLogin
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              Login
-            </button>
-            <button
-              onClick={() => setIsLogin(false)}
-              className={`flex-1 py-2 rounded-lg font-medium transition ${
-                !isLogin
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              Sign Up
-            </button>
-          </div>
+        <div className="bg-white rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.05)] p-10 md:p-16 border border-slate-900/5 relative overflow-hidden">
+          {/* Subtle decorative background element */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/5 rounded-bl-[5rem]" />
 
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900">
-              {isLogin ? "Welcome Back!" : "Create Account"}
-            </h2>
-            <p className="text-gray-600 mt-2">
-              {isLogin
-                ? "Enter your credentials to access your account"
-                : "Fill in your details to get started"}
-            </p>
-          </div>
+          <div className="relative z-10">
+            <div className="mb-12">
+              <h2 className="text-4xl font-syne font-bold tracking-tighter mb-4">
+                {isLogin ? "Access the Protocol" : "Join the Network"}
+              </h2>
+              <p className="text-slate-500 font-light text-lg">
+                {isLogin 
+                  ? "Enter your credentials to synchronize with your health profile." 
+                  : "Initialize your secure health ecosystem today."}
+              </p>
+            </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Full Name (Sign Up Only) */}
-            {!isLogin && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {!isLogin && (
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Full Name</label>
+                    <div className="relative group">
+                      <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 transition-colors group-focus-within:text-teal-500" />
+                      <input
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        placeholder="John Doe"
+                        className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-medium"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Phone</label>
+                    <div className="relative group">
+                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 transition-colors group-focus-within:text-teal-500" />
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        placeholder="+1 234 567 890"
+                        className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-medium"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Email Identifier</label>
+                <div className="relative group">
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 transition-colors group-focus-within:text-teal-500" />
                   <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
+                    type="email"
+                    name="email"
+                    value={formData.email}
                     onChange={handleChange}
-                    placeholder="Your Good Name"
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="protocol@medtracker.io"
+                    className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-medium"
                     required
                   />
                 </div>
               </div>
-            )}
 
-            {/* Phone Number (Sign Up Only) */}
-            {!isLogin && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone Number
-                </label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    placeholder="9876543210"
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="you@example.com"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="••••••••"
-                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPassword ? <EyeOff /> : <Eye />}
-                </button>
-              </div>
-            </div>
-
-            {/* Confirm Password (Sign Up Only) */}
-            {!isLogin && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Confirm Password
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Secure Passkey</label>
+                <div className="relative group">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 transition-colors group-focus-within:text-teal-500" />
                   <input
                     type={showPassword ? "text" : "password"}
-                    name="confirmPassword"
-                    placeholder="••••••••"
-                    value={formData.confirmPassword}
+                    name="password"
+                    value={formData.password}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="••••••••••••"
+                    className="w-full pl-11 pr-12 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-medium"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-900 transition-colors"
                   >
-                    {showPassword ? <EyeOff /> : <Eye />}
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
-            )}
 
-            {error && <p className="text-red-500 text-sm">{error}</p>}
+              {!isLogin && (
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Confirm Passkey</label>
+                  <div className="relative group">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 transition-colors group-focus-within:text-teal-500" />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      placeholder="••••••••••••"
+                      className="w-full pl-11 pr-12 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-medium"
+                      required
+                    />
+                  </div>
+                </div>
+              )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-semibold"
-            >
-              {loading
-                ? "Please wait..."
-                : isLogin
-                ? "Sign In"
-                : "Create Account"}
-            </button>
-          </form>
+              {error && (
+                <div className="p-4 bg-red-50 text-red-600 rounded-2xl text-sm font-medium border border-red-100 animate-reveal-up">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-slate-900 text-white py-5 rounded-[1.25rem] hover:bg-teal-600 transition-all duration-300 font-bold text-lg flex items-center justify-center gap-3 group relative overflow-hidden"
+              >
+                {loading ? (
+                  <Loader2 className="w-6 h-6 animate-spin" />
+                ) : (
+                  <>
+                    <span>{isLogin ? "Synchronize" : "Initialize Account"}</span>
+                    <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            <div className="mt-12 text-center">
+              <button
+                onClick={() => {
+                  setIsLogin(!isLogin);
+                  setError("");
+                }}
+                className="text-sm font-bold uppercase tracking-widest text-slate-400 hover:text-teal-600 transition-colors"
+              >
+                {isLogin ? "Need to join the network?" : "Already have clinical access?"}
+              </button>
+            </div>
+          </div>
         </div>
+        
+        <p className="mt-12 text-center text-slate-400 text-xs uppercase tracking-widest font-bold">
+          © 2026 MedTracker Protocol • Secure End-to-End Encryption
+        </p>
       </div>
     </div>
   );

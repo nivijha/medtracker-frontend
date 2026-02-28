@@ -2,26 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --primary-blue: #2563EB;
-  --light-blue: #DBEAFE;
-  --dark-blue: #1E40AF;
-  --blue-600: #2563EB;
-  --blue-700: #1D4ED8;
+@layer base {
+  body {
+    @apply font-hanken selection:bg-teal-500/30 selection:text-slate-900;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-syne tracking-tight;
+  }
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .grid-break {
+    grid-column: 1 / -1;
+  }
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* Custom grain effect */
+.bg-grain {
+  position: relative;
+}
+
+.bg-grain::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.03;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Section transitions */
+.section-mask {
+  mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
 }
 
 html {
@@ -30,74 +50,13 @@ html {
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  @apply bg-background;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2563EB;
-  border-radius: 5px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #1D4ED8;
-}
-
-/* Animation utilities */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fadeIn {
-  animation: fadeIn 0.5s ease-out;
-}
-
-/* Custom button styles */
-.btn-primary {
-  @apply bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200;
-}
-
-.btn-secondary {
-  @apply border-2 border-blue-600 text-blue-600 px-6 py-2 rounded-lg hover:bg-blue-50 transition duration-200;
-}
-
-/* Card styles */
-.card {
-  @apply bg-white rounded-xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition duration-200;
-}
-
-/* Input styles */
-.input-field {
-  @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
-}
-
-/* Utility classes */
-.text-gradient {
-  background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.bg-gradient-blue {
-  background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
-}
-
-/* Section spacing */
-.section-padding {
-  @apply py-20 px-4 sm:px-6 lg:px-8;
-}
-
-.container-custom {
-  @apply max-w-7xl mx-auto;
+  @apply bg-slate-700/20 rounded-full transition-colors hover:bg-slate-700/40;
 }

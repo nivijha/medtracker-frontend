@@ -8,21 +8,37 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
+        background: '#FAF9F6',
+        slate: {
+          900: '#1A2A3A',
+          800: '#2A3A4A',
+          700: '#3A4A5A',
         },
+        teal: {
+          500: '#00D2A0',
+          600: '#00B086',
+        },
+        steel: {
+          500: '#788A94',
+        }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        syne: ['var(--font-syne)', 'sans-serif'],
+        hanken: ['var(--font-hanken)', 'sans-serif'],
+      },
+      animation: {
+        'reveal-up': 'revealUp 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
+        'fade-in': 'fadeIn 1s ease-out',
+      },
+      keyframes: {
+        revealUp: {
+          '0%': { transform: 'translateY(30px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
       },
     },
   },

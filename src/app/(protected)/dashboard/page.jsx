@@ -8,45 +8,66 @@ import {
   Stethoscope,
   Clock,
   User,
+  Plus,
+  ArrowRight,
+  Loader2,
+  ChevronRight
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getAppointments, getReports, getMedications } from "@/lib/utils";
 
 /* ---------------- UI COMPONENTS ---------------- */
 
-const DashboardCard = ({ title, value, subtitle, icon: Icon, onClick }) => (
-  <div
-    onClick={onClick}
-    className="p-5 sm:p-6 bg-white rounded-xl border shadow-sm hover:shadow-md cursor-pointer"
-  >
-    <div className="p-3 bg-gray-100 rounded-lg w-fit mb-4">
-      <Icon className="w-6 h-6 text-gray-600" />
-    </div>
-    <h3 className="text-sm text-gray-600">{title}</h3>
-    <p className="text-2xl sm:text-3xl font-bold text-gray-900">{value}</p>
-    <p className="text-sm text-gray-500">{subtitle}</p>
-  </div>
-);
-
-const ActivityItem = ({ title, time, status }) => {
-  const statusStyles = {
-    completed: "bg-green-100 text-green-700",
-    pending: "bg-yellow-100 text-yellow-700",
-    upcoming: "bg-blue-100 text-blue-700",
+const DashboardCard = ({ title, value, subtitle, icon: Icon, onClick, accent = "slate" }) => {
+  const accentStyles = {
+    teal: "text-teal-500 bg-teal-500/10",
+    slate: "text-slate-900 bg-slate-100",
   };
 
   return (
-    <div className="flex items-center justify-between gap-4 px-4 py-3 rounded-lg hover:bg-gray-50 transition">
-      <div className="flex items-start gap-3 min-w-0">
-        <div className="p-2 bg-gray-100 rounded-lg">
-          <Clock className="w-4 h-4 text-gray-600" />
+    <div
+      onClick={onClick}
+      className="group p-8 bg-white rounded-[2rem] border border-slate-900/5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] hover:border-teal-500/20 cursor-pointer transition-all duration-500 overflow-hidden relative"
+    >
+      <div className={`p-4 rounded-2xl w-fit mb-8 transition-transform group-hover:scale-110 duration-500 ${accentStyles[accent] || accentStyles.slate}`}>
+        <Icon className="w-6 h-6" />
+      </div>
+      <div className="relative z-10">
+        <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-2">{title}</h3>
+        <div className="flex items-baseline gap-2 mb-1">
+          <p className="text-4xl font-syne font-bold text-slate-900 tracking-tighter">{value}</p>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{subtitle}</p>
+        </div>
+      </div>
+      
+      <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+        <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center">
+          <ChevronRight size={16} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ActivityItem = ({ title, time, status }) => {
+  const statusStyles = {
+    completed: "bg-emerald-50 text-emerald-600 border-emerald-100",
+    pending: "bg-amber-50 text-amber-600 border-amber-100",
+    upcoming: "bg-teal-50 text-teal-600 border-teal-100",
+  };
+
+  return (
+    <div className="group flex items-center justify-between gap-6 p-6 rounded-3xl hover:bg-slate-50 border border-transparent hover:border-slate-900/5 transition-all duration-300">
+      <div className="flex items-start gap-4 min-w-0">
+        <div className="p-3 bg-white shadow-sm rounded-2xl border border-slate-900/5 group-hover:scale-110 transition-transform duration-300">
+          <Clock className="w-5 h-5 text-slate-400" />
         </div>
 
-        <div className="min-w-0">
-          <p className="text-sm font-medium text-gray-900 truncate">
+        <div className="min-w-0 pt-1">
+          <p className="text-sm font-bold text-slate-900 truncate tracking-tight">
             {title}
           </p>
-          <p className="text-xs text-gray-500 mt-0.5">
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
             {new Date(time).toLocaleString(undefined, {
               hour: "2-digit",
               minute: "2-digit",
@@ -59,8 +80,8 @@ const ActivityItem = ({ title, time, status }) => {
       </div>
 
       <span
-        className={`shrink-0 px-3 py-1 text-xs font-medium rounded-full capitalize ${
-          statusStyles[status] || "bg-gray-100 text-gray-700"
+        className={`shrink-0 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-full border ${
+          statusStyles[status] || "bg-slate-100 text-slate-600 border-slate-200"
         }`}
       >
         {status}
@@ -116,7 +137,7 @@ export default function DashboardPage() {
       apts?.forEach((a) => {
         if (!a.appointmentDateTime) return;
         activity.push({
-          title: `Appointment with ${a.doctorName}`,
+          title: `Consultation: ${a.doctorName}`,
           time: a.appointmentDateTime,
           status:
             new Date(a.appointmentDateTime) >= new Date()
@@ -127,7 +148,7 @@ export default function DashboardPage() {
 
       reps?.forEach((r) => {
         activity.push({
-          title: "Medical report uploaded",
+          title: "Clinical Document Uploaded",
           time: r.createdAt,
           status: "completed",
         });
@@ -161,87 +182,146 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      <div className="h-[60vh] flex items-center justify-center">
+        <Loader2 className="w-10 h-10 text-teal-500 animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 sm:px-6 py-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-
-        {/* HEADER */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-              {isNewUser
-                ? `Welcome, ${userName}`
-                : `Welcome back, ${userName}`}
-            </h1>
-            <p className="text-gray-600 text-sm sm:text-base">
-              Overview of your health activity
-            </p>
+    <div className="space-y-12">
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-8">
+        <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-slate-900/10 text-[10px] font-bold uppercase tracking-widest mb-4">
+            <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
+            Live Network Synchronized
           </div>
-
-          <button
-            onClick={() => router.push("/profile")}
-            className="self-start sm:self-auto p-3 bg-white border rounded-xl hover:shadow"
-          >
-            <User className="w-5 h-5 text-gray-600" />
-          </button>
+          <h1 className="text-4xl md:text-6xl font-syne font-bold tracking-tighter">
+            {isNewUser
+              ? `Welcome, ${userName}.`
+              : `Welcome back, ${userName}.`}
+          </h1>
+          <p className="text-slate-500 text-lg font-light mt-2">
+            Real-time overview of your health ecosystem and records.
+          </p>
         </div>
 
-        {/* STATS */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          <DashboardCard
-            title="Upcoming Appointments"
-            value={upcomingAppointments}
-            subtitle="Scheduled"
-            icon={CalendarIcon}
-            onClick={() => router.push("/appointments")}
-          />
-          <DashboardCard
-            title="Medical Reports"
-            value={reports.length}
-            subtitle="Uploaded"
-            icon={FileText}
-            onClick={() => router.push("/reports")}
-          />
-          <DashboardCard
-            title="Active Medications"
-            value={medications.filter((m) => m.status === "active").length}
-            subtitle="Currently taking"
-            icon={Activity}
-            onClick={() => router.push("/medications")}
-          />
-          <DashboardCard
-            title="Next Check-up"
-            value={upcomingAppointments ? "Scheduled" : "—"}
-            subtitle="Appointments"
-            icon={Stethoscope}
-            onClick={() => router.push("/appointments")}
-          />
-        </div>
-
-        {/* RECENT ACTIVITY */}
-        <div className="bg-white rounded-xl border shadow-sm">
-          <div className="p-5 sm:p-6 border-b">
-            <h2 className="text-lg font-semibold">Recent Activity</h2>
-            <p className="text-sm text-gray-500">
-              Sorted by latest updates
-            </p>
+        <button
+          onClick={() => router.push("/profile")}
+          className="group flex items-center gap-4 p-2 pl-4 pr-6 bg-white border border-slate-900/5 rounded-full hover:border-teal-500 transition-all duration-300"
+        >
+          <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center transition-colors group-hover:bg-teal-500 group-hover:text-white">
+            <User size={20} />
           </div>
-          <div className="p-4 space-y-2">
+          <span className="text-sm font-bold uppercase tracking-widest">Protocol Profile</span>
+        </button>
+      </div>
+
+      {/* STATS */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <DashboardCard
+          title="Scheduled Visists"
+          value={upcomingAppointments}
+          subtitle="Active"
+          icon={CalendarIcon}
+          accent="teal"
+          onClick={() => router.push("/appointments")}
+        />
+        <DashboardCard
+          title="Clinical Vault"
+          value={reports.length}
+          subtitle="Files"
+          icon={FileText}
+          onClick={() => router.push("/reports")}
+        />
+        <DashboardCard
+          title="Active Meds"
+          value={medications.filter((m) => m.status === "active").length}
+          subtitle="Doses"
+          icon={Activity}
+          onClick={() => router.push("/medications")}
+        />
+        <DashboardCard
+          title="Health Status"
+          value={upcomingAppointments ? "Stable" : "Clear"}
+          subtitle="Condition"
+          icon={Stethoscope}
+          accent="teal"
+          onClick={() => router.push("/appointments")}
+        />
+      </div>
+
+      {/* RECENT ACTIVITY & SYSTEM LOGS */}
+      <div className="grid lg:grid-cols-12 gap-10">
+        <div className="lg:col-span-8 bg-white rounded-[2.5rem] border border-slate-900/5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden">
+          <div className="p-10 border-b border-slate-900/5 flex justify-between items-center">
+            <div>
+              <h2 className="text-2xl font-syne font-bold tracking-tight">System Logs</h2>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mt-1">
+                Recent Health Activity & Updates
+              </p>
+            </div>
+            <button className="p-3 bg-slate-50 rounded-2xl text-slate-400 hover:text-slate-900 transition-colors">
+              <Plus size={20} />
+            </button>
+          </div>
+          <div className="p-4 space-y-1">
             {recentActivity.length ? (
               recentActivity.map((item, i) => (
                 <ActivityItem key={i} {...item} />
               ))
             ) : (
-              <p className="text-center text-gray-500">
-                No recent activity
-              </p>
+              <div className="py-20 text-center">
+                <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Activity size={24} className="text-slate-200" />
+                </div>
+                <p className="text-sm font-bold uppercase tracking-widest text-slate-300">
+                  No activity detected
+                </p>
+              </div>
             )}
+          </div>
+          {recentActivity.length > 0 && (
+            <div className="p-6 bg-slate-50/50 text-center border-t border-slate-900/5">
+              <button className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 hover:text-teal-600 transition-colors">
+                View All Activity Logs
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="lg:col-span-4 space-y-6">
+          <div className="bg-slate-900 text-white rounded-[2.5rem] p-10 relative overflow-hidden group">
+            <div className="relative z-10">
+              <h3 className="text-2xl font-syne font-bold mb-4">Clinical Support</h3>
+              <p className="text-slate-400 text-sm leading-relaxed mb-8">
+                Need assistance with your records? Our medical orchestration team is available 24/7.
+              </p>
+              <button className="w-full py-4 bg-teal-500 text-slate-900 rounded-2xl font-bold uppercase tracking-widest text-xs hover:bg-white transition-all duration-300">
+                Contact Support
+              </button>
+            </div>
+            <div className="absolute bottom-[-10%] right-[-10%] w-32 h-32 bg-teal-500/10 rounded-full blur-3xl group-hover:bg-teal-500/20 transition-colors duration-700" />
+          </div>
+
+          <div className="bg-white rounded-[2.5rem] p-10 border border-slate-900/5 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+            <h3 className="text-lg font-syne font-bold mb-6">Network Nodes</h3>
+            <div className="space-y-6">
+              {[
+                { label: "Main Database", status: "Operational" },
+                { label: "Secure Vault", status: "Encrypted" },
+                { label: "Sync Engine", status: "Active" }
+              ].map((node, i) => (
+                <div key={i} className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-slate-500">{node.label}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-teal-500" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest">{node.status}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
