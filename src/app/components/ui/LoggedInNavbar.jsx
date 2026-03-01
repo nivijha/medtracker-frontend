@@ -49,8 +49,8 @@ export default function LoggedInNavbar() {
   ];
 
   return (
-    <nav className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'py-4 bg-background/80 backdrop-blur-md border-b border-slate-900/5' : 'py-6 bg-transparent'}`}>
-      <div className="max-w-screen-2xl mx-auto px-6 md:px-12 flex justify-between items-center">
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 h-24 flex items-center ${scrolled ? 'bg-background/80 backdrop-blur-md border-b border-slate-900/5 shadow-sm' : 'bg-transparent'}`}>
+      <div className="max-w-screen-2xl mx-auto px-6 md:px-12 flex justify-between items-center w-full">
         {/* LOGO */}
         <Link href="/dashboard" className="flex items-center gap-2 group">
           <div className="w-8 h-8 bg-slate-900 rounded-full flex items-center justify-center transition-transform group-hover:rotate-12">

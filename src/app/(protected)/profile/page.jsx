@@ -152,7 +152,7 @@ export default function ProfilePage() {
             href="/profile/edit"
             className="group/btn bg-white text-slate-900 px-10 py-5 rounded-full font-bold text-sm uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-teal-500 hover:text-slate-900 transition-all duration-300 shadow-xl"
           >
-            <span>Modify Identity</span>
+            <span>Edit</span>
             <Edit size={16} className="transition-transform group-hover/btn:rotate-12" />
           </Link>
         </div>

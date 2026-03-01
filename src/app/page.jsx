@@ -59,17 +59,28 @@ export default function LandingPage() {
       {/* NAVIGATION */}
       <nav className={`fixed w-full top-0 z-50 transition-all duration-300 ${scrolled ? 'py-4 bg-background/80 backdrop-blur-md border-b border-slate-900/5' : 'py-6 bg-transparent'}`}>
         <div className="max-w-screen-2xl mx-auto px-6 md:px-12 flex justify-between items-center">
-          <div className="flex items-center gap-2 group cursor-pointer">
+          <Link href="/" className="flex items-center gap-2 group cursor-pointer">
             <div className="w-8 h-8 bg-slate-900 rounded-full flex items-center justify-center transition-transform group-hover:rotate-12">
               <Plus className="text-teal-500 w-5 h-5" />
             </div>
             <span className="text-xl font-syne font-bold tracking-tight">MedTracker</span>
-          </div>
+          </Link>
 
           {/* DESKTOP NAV */}
           <div className="hidden md:flex items-center gap-10">
-            {['Services', 'Methodology', 'Ethics'].map((item) => (
-              <a key={item} href={`#${item.toLowerCase()}`} className="text-sm font-medium hover:text-teal-600 transition-colors uppercase tracking-widest">{item}</a>
+            {['Services', 'Methodology'].map((item) => (
+              <a 
+                key={item} 
+                href={`#${item.toLowerCase()}`} 
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById(item.toLowerCase())?.scrollIntoView({ behavior: 'smooth' });
+                  window.history.replaceState(null, '', `#${item.toLowerCase()}`);
+                }}
+                className="text-sm font-medium hover:text-teal-600 transition-colors uppercase tracking-widest"
+              >
+                {item}
+              </a>
             ))}
             <Link href="/login" className="text-sm font-bold uppercase tracking-widest border-b-2 border-slate-900 pb-0.5 hover:border-teal-500 transition-colors">Login</Link>
             <Link href="/login">
@@ -89,7 +100,7 @@ export default function LandingPage() {
       {/* MOBILE MENU */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-40 bg-background flex flex-col p-8 pt-24 animate-fade-in md:hidden">
-          {['Services', 'Methodology', 'Ethics'].map((item) => (
+          {['Services', 'Methodology'].map((item) => (
             <a key={item} href={`#${item.toLowerCase()}`} onClick={() => setMobileMenuOpen(false)} className="text-4xl font-syne font-bold mb-6 hover:text-teal-600 transition-colors">{item}</a>
           ))}
           <div className="mt-auto flex flex-col gap-4">
@@ -239,7 +250,7 @@ export default function LandingPage() {
             </h2>
             <Link href="/login">
               <button className="bg-slate-900 text-white px-12 py-5 rounded-full text-xl font-bold hover:scale-105 transition-transform duration-300">
-                Initiate Secure Access
+                Get Started
               </button>
             </Link>
           </div>
@@ -264,16 +275,38 @@ export default function LandingPage() {
             </p>
           </div>
           <div className="md:col-span-8 grid grid-cols-2 md:grid-cols-4 gap-8">
-            {['Ecosystem', 'Resources', 'Legal', 'Social'].map((category) => (
-              <div key={category}>
-                <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-6">{category}</div>
-                <div className="flex flex-col gap-4 text-sm font-medium">
-                  <a href="#" className="hover:text-teal-600 transition-colors">Interface</a>
-                  <a href="#" className="hover:text-teal-600 transition-colors">Security</a>
-                  <a href="#" className="hover:text-teal-600 transition-colors">Insights</a>
-                </div>
+            <div>
+              <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-6">Platform</div>
+              <div className="flex flex-col gap-4 text-sm font-medium">
+                <Link href="/dashboard" className="hover:text-teal-600 transition-colors">Dashboard</Link>
+                <Link href="/appointments" className="hover:text-teal-600 transition-colors">Appointments</Link>
+                <Link href="/medications" className="hover:text-teal-600 transition-colors">Medications</Link>
               </div>
-            ))}
+            </div>
+            <div>
+              <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-6">Company</div>
+              <div className="flex flex-col gap-4 text-sm font-medium">
+                <a href="#services" className="hover:text-teal-600 transition-colors">Services</a>
+                <a href="#methodology" className="hover:text-teal-600 transition-colors">Methodology</a>
+                <Link href="/login" className="hover:text-teal-600 transition-colors">Join Network</Link>
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-6">Legal</div>
+              <div className="flex flex-col gap-4 text-sm font-medium">
+                <a href="#" className="hover:text-teal-600 transition-colors">Privacy Codex</a>
+                <a href="#" className="hover:text-teal-600 transition-colors">Terms of Service</a>
+                <a href="#" className="hover:text-teal-600 transition-colors">Security</a>
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-6">Social</div>
+              <div className="flex flex-col gap-4 text-sm font-medium">
+                <a href="#" className="hover:text-teal-600 transition-colors">LinkedIn</a>
+                <a href="#" className="hover:text-teal-600 transition-colors">X / Twitter</a>
+                <a href="#" className="hover:text-teal-600 transition-colors">GitHub</a>
+              </div>
+            </div>
           </div>
         </div>
         <div className="flex flex-col md:row gap-8 justify-between items-center text-[10px] uppercase tracking-widest font-bold text-slate-400">
