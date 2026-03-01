@@ -37,32 +37,54 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async (email, password) => {
     const res = await API.post("/api/auth/login", { email, password });
-    const { user } = res.data;
+    const { user, token } = res.data;
     setUser(user);
+    
+    // Protocol-aware cookie setting
+    const isSecure = window.location.protocol === "https:";
+    const cookieBase = `token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
+    document.cookie = isSecure ? `${cookieBase}; Secure` : cookieBase;
+    
     router.push("/dashboard");
     return res.data;
   }, [router]);
 
   const register = useCallback(async (name, email, phone, password) => {
     const res = await API.post("/api/auth/register", { name, email, phone, password });
-    const { user } = res.data;
+    const { user, token } = res.data;
     setUser(user);
+    
+    // Protocol-aware cookie setting
+    const isSecure = window.location.protocol === "https:";
+    const cookieBase = `token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
+    document.cookie = isSecure ? `${cookieBase}; Secure` : cookieBase;
+    
     router.push("/dashboard");
     return res.data;
   }, [router]);
 
   const logout = useCallback(async () => {
+    console.log("LOGOUT INITIATED");
     try {
       await API.post("/api/auth/logout");
-      setUser(null);
-      router.push("/login");
     } catch (err) {
-      console.error("Logout failed", err);
-      // Force logout on client even if API fails
+      console.error("Logout API call failed", err);
+    } finally {
       setUser(null);
-      router.push("/login");
+      
+      // Force-clear cookies with all possible variations to ensure they are gone
+      const isSecure = window.location.protocol === "https:";
+      const expiry = "expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      
+      // Standard clear
+      document.cookie = `token=; path=/; ${expiry}; SameSite=Lax${isSecure ? "; Secure" : ""}`;
+      // Backup clear (sometimes needed if attributes were inconsistent)
+      document.cookie = `token=; path=/; ${expiry}`;
+      
+      console.log("REDIRECTING TO LOGIN");
+      window.location.href = "/login";
     }
-  }, [router]);
+  }, []);
 
   const updateUser = useCallback((newUser) => {
     setUser(newUser);

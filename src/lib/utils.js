@@ -16,6 +16,20 @@ const API = axios.create({
 API.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.error("API ERROR DETAILS:", {
+      message: error.message,
+      code: error.code,
+      config: {
+        url: error.config?.url,
+        method: error.config?.method,
+        headers: error.config?.headers,
+      },
+      response: error.response ? {
+        status: error.response.status,
+        data: error.response.data
+      } : "NO_RESPONSE"
+    });
+
     if (error.response && error.response.status === 401) {
       // If we are not already on the login page or landing page, redirect
       if (typeof window !== "undefined") {

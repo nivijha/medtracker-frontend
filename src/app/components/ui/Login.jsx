@@ -202,7 +202,7 @@ export default function Login() {
                   <Loader2 className="w-6 h-6 animate-spin" />
                 ) : (
                   <>
-                    <span>{isLogin ? "Synchronize" : "Initialize Account"}</span>
+                    <span>{isLogin ? "Sign In" : "Sign Up"}</span>
                     <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                   </>
                 )}
