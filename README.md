@@ -85,7 +85,7 @@ A modern, user-friendly medical records management system built with Next.js. Me
 
 ## Project Structure
 
-```
+```dir
 medtracker-frontend/
 ├── src/
 │   ├── app/

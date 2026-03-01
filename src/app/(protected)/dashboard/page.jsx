@@ -135,7 +135,7 @@ export default function DashboardPage() {
         getMedications(),
       ]);
 
-      const reps = repsData.reports || [];
+      const reps = Array.isArray(repsData) ? repsData : (repsData?.reports || []);
       setAppointments(apts || []);
       setReports(reps || []);
       setMedications(meds || []);

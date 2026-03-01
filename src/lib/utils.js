@@ -1,4 +1,11 @@
 import axios from "axios";
+import { clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+/* ================== UTILITIES ================== */
+export function cn(...inputs) {
+  return twMerge(clsx(inputs));
+}
 
 /* ================== AXIOS INSTANCE ================== */
 const API = axios.create({
@@ -10,9 +17,12 @@ API.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      // If we are not already on the login page, redirect
-      if (typeof window !== "undefined" && !window.location.pathname.includes("/login")) {
-         window.location.href = "/login";
+      // If we are not already on the login page or landing page, redirect
+      if (typeof window !== "undefined") {
+         const { pathname } = window.location;
+         if (pathname !== "/" && !pathname.includes("/login")) {
+            window.location.href = "/login";
+         }
       }
     }
     return Promise.reject(error);

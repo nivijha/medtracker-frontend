@@ -175,10 +175,13 @@ export default function EnhancedReportsPage() {
   const fetchReports = async () => {
     try {
       setLoading(true);
-      const reportsData = await getReports();
-      setReports(reportsData || []);
+      const res = await getReports();
+      // Handle both cases: direct array or object with reports property
+      const reportsData = Array.isArray(res) ? res : (res?.reports || []);
+      setReports(reportsData);
     } catch (error) {
       console.error("Error fetching reports:", error);
+      setReports([]);
     } finally {
       setLoading(false);
     }
@@ -192,7 +195,7 @@ export default function EnhancedReportsPage() {
     }
   };
 
-  const filteredReports = reports.filter((report) => {
+  const filteredReports = (Array.isArray(reports) ? reports : []).filter((report) => {
     const reportDesc = report.description || "";
     const reportType = report.type || "";
     const matchesSearch =
