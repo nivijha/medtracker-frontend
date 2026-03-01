@@ -18,6 +18,7 @@ import {
 import { useRouter } from "next/navigation";
 import { getAppointments, getReports, getMedications } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
+import { Skeleton } from "@/app/components/ui/skeleton";
 
 /* ---------------- UI COMPONENTS ---------------- */
 
@@ -32,7 +33,7 @@ const ClinicalHologram = () => (
   </div>
 );
 
-const DashboardCard = ({ title, value, subtitle, icon: Icon, onClick, accent = "slate" }) => {
+const DashboardCard = ({ title, value, subtitle, icon: Icon, onClick, accent = "slate", isLoading }) => {
   const accentStyles = {
     teal: "text-teal-500 bg-teal-500/10",
     slate: "text-slate-900 bg-slate-100",
@@ -49,7 +50,11 @@ const DashboardCard = ({ title, value, subtitle, icon: Icon, onClick, accent = "
       <div className="relative z-10">
         <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-2">{title}</h3>
         <div className="flex items-baseline gap-2 mb-1">
-          <p className="text-4xl font-syne font-bold text-slate-900 tracking-tighter">{value}</p>
+          {isLoading ? (
+            <Skeleton className="h-10 w-16" />
+          ) : (
+            <p className="text-4xl font-syne font-bold text-slate-900 tracking-tighter">{value}</p>
+          )}
           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{subtitle}</p>
         </div>
       </div>
@@ -124,12 +129,13 @@ export default function DashboardPage() {
 
   const fetchDashboard = async () => {
     try {
-      const [apts, reps, meds] = await Promise.all([
+      const [apts, repsData, meds] = await Promise.all([
         getAppointments(),
-        getReports(),
+        getReports(1, 10), // Limit to 10 for dashboard
         getMedications(),
       ]);
 
+      const reps = repsData.reports || [];
       setAppointments(apts || []);
       setReports(reps || []);
       setMedications(meds || []);
@@ -189,14 +195,6 @@ export default function DashboardPage() {
       a.status !== "cancelled"
   ).length;
 
-  if (loading || authLoading) {
-    return (
-      <div className="h-[60vh] flex items-center justify-center">
-        <Loader2 className="w-10 h-10 text-teal-500 animate-spin" />
-      </div>
-    );
-  }
-
   const userName = user?.name ? user.name.split(" ")[0] : "User";
 
   return (
@@ -210,11 +208,15 @@ export default function DashboardPage() {
             <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
             Live Network Synchronized
           </div>
-          <h1 className="text-4xl md:text-7xl font-syne font-bold tracking-tighter leading-none">
-            {isNewUser
-              ? `Welcome, ${userName}.`
-              : `Welcome back, ${userName}.`}
-          </h1>
+          {authLoading ? (
+            <Skeleton className="h-16 w-64" />
+          ) : (
+            <h1 className="text-4xl md:text-7xl font-syne font-bold tracking-tighter leading-none">
+              {isNewUser
+                ? `Welcome, ${userName}.`
+                : `Welcome back, ${userName}.`}
+            </h1>
+          )}
           <p className="text-slate-500 text-lg font-light mt-4 max-w-xl">
             Real-time overview of your health ecosystem. System status: <span className="text-emerald-500 font-bold uppercase text-xs tracking-widest">Optimized</span>
           </p>
@@ -239,6 +241,7 @@ export default function DashboardPage() {
           subtitle="Active"
           icon={CalendarIcon}
           accent="teal"
+          isLoading={loading}
           onClick={() => router.push("/appointments")}
         />
         <DashboardCard
@@ -246,6 +249,7 @@ export default function DashboardPage() {
           value={reports.length}
           subtitle="Files"
           icon={FileText}
+          isLoading={loading}
           onClick={() => router.push("/reports")}
         />
         <DashboardCard
@@ -253,6 +257,7 @@ export default function DashboardPage() {
           value={medications.filter((m) => m.status === "active").length}
           subtitle="Doses"
           icon={Activity}
+          isLoading={loading}
           onClick={() => router.push("/medications")}
         />
         <DashboardCard
@@ -261,6 +266,7 @@ export default function DashboardPage() {
           subtitle="Condition"
           icon={Stethoscope}
           accent="teal"
+          isLoading={loading}
           onClick={() => router.push("/appointments")}
         />
       </div>
@@ -280,7 +286,20 @@ export default function DashboardPage() {
             </button>
           </div>
           <div className="p-4 space-y-1">
-            {recentActivity.length ? (
+            {loading ? (
+              Array(4).fill(0).map((_, i) => (
+                <div key={i} className="flex items-center justify-between p-6">
+                  <div className="flex items-center gap-4">
+                    <Skeleton className="h-12 w-12 rounded-2xl" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-48" />
+                      <Skeleton className="h-3 w-32" />
+                    </div>
+                  </div>
+                  <Skeleton className="h-6 w-20 rounded-full" />
+                </div>
+              ))
+            ) : recentActivity.length ? (
               recentActivity.map((item, i) => (
                 <ActivityItem key={i} {...item} />
               ))
@@ -344,4 +363,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-

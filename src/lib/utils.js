@@ -67,8 +67,8 @@ export const updateUserSecurity = async ({ currentPassword, newPassword }) => {
 
 /* ================== REPORT APIs ================== */
 
-export const getReports = async () => {
-  const res = await API.get("/api/reports/my");
+export const getReports = async (page = 1, limit = 10) => {
+  const res = await API.get(`/api/reports/my?page=${page}&limit=${limit}`);
   return res.data;
 };
 
@@ -86,9 +86,9 @@ export const deleteReport = async (reportId) => {
 
 /* ================== TEST APIs ================== */
 
-export const getTests = async () => {
-  const res = await API.get("/api/tests/my");
-  return res.data || [];
+export const getTests = async (page = 1, limit = 10) => {
+  const res = await API.get(`/api/tests/my?page=${page}&limit=${limit}`);
+  return res.data;
 };
 
 export const recordTest = async (testData) => {
