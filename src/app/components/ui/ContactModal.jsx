@@ -47,7 +47,8 @@ export default function ContactModal({ isOpen, onClose }) {
               };
               
               try {
-                const response = await fetch('http://localhost:5000/api/contact', {
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+                const response = await fetch(`${apiUrl}/contact`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify(formData)

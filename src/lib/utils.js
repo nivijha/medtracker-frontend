@@ -9,7 +9,7 @@ export function cn(...inputs) {
 
 /* ================== AXIOS INSTANCE ================== */
 const API = axios.create({
-  baseURL: "http://localhost:5000",
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   withCredentials: true,
 });
 
