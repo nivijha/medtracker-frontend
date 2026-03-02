@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import ContactModal from '@/app/components/ui/ContactModal';
 import {
   Activity,
   Calendar as CalendarIcon,
@@ -117,6 +118,7 @@ export default function DashboardPage() {
 
   const [loading, setLoading] = useState(true);
   const [isNewUser, setIsNewUser] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
 
   const [appointments, setAppointments] = useState([]);
   const [reports, setReports] = useState([]);
@@ -163,7 +165,7 @@ export default function DashboardPage() {
 
       reps?.forEach((r) => {
         activity.push({
-          title: "Clinical Document Uploaded",
+          title: `Report uploaded`,
           time: r.createdAt,
           status: "completed",
         });
@@ -206,7 +208,7 @@ export default function DashboardPage() {
         <div className="animate-reveal-up">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-slate-900/10 text-[10px] font-bold uppercase tracking-widest mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
-            Live Network Synchronized
+            Up to date
           </div>
           {authLoading ? (
             <Skeleton className="h-16 w-64" />
@@ -218,7 +220,7 @@ export default function DashboardPage() {
             </h1>
           )}
           <p className="text-slate-500 text-lg font-light mt-4 max-w-xl">
-            Real-time overview of your health ecosystem. System status: <span className="text-emerald-500 font-bold uppercase text-xs tracking-widest">Optimized</span>
+            Your health at a glance. Everything looks good.
           </p>
         </div>
 
@@ -229,23 +231,23 @@ export default function DashboardPage() {
           <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center transition-colors group-hover:bg-teal-500 group-hover:text-white">
             <User size={20} />
           </div>
-          <span className="text-sm font-bold uppercase tracking-widest">Protocol Profile</span>
+          <span className="text-sm font-bold uppercase tracking-widest">View Profile</span>
         </button>
       </div>
 
       {/* STATS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
         <DashboardCard
-          title="Scheduled Visists"
+          title="Scheduled Visits"
           value={upcomingAppointments}
-          subtitle="Active"
+          subtitle="Upcoming"
           icon={CalendarIcon}
           accent="teal"
           isLoading={loading}
           onClick={() => router.push("/appointments")}
         />
         <DashboardCard
-          title="Clinical Vault"
+          title="Reports"
           value={reports.length}
           subtitle="Files"
           icon={FileText}
@@ -276,9 +278,9 @@ export default function DashboardPage() {
         <div className="lg:col-span-8 bg-white rounded-[2.5rem] border border-slate-900/5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden">
           <div className="p-10 border-b border-slate-900/5 flex justify-between items-center bg-slate-50/30">
             <div>
-              <h2 className="text-2xl font-syne font-bold tracking-tight">System Logs</h2>
+              <h2 className="text-2xl font-syne font-bold tracking-tight">Recent Activity</h2>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mt-1">
-                Recent Health Activity & Updates
+                Your latest updates
               </p>
             </div>
             <button className="p-3 bg-white border border-slate-900/5 rounded-2xl text-slate-400 hover:text-teal-500 transition-all shadow-sm">
@@ -317,7 +319,7 @@ export default function DashboardPage() {
           {recentActivity.length > 0 && (
             <div className="p-6 bg-slate-50/50 text-center border-t border-slate-900/5">
               <button className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 hover:text-teal-600 transition-colors">
-                View All Activity Logs
+                View all
               </button>
             </div>
           )}
@@ -329,11 +331,14 @@ export default function DashboardPage() {
               <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mb-8 border border-white/5">
                 <Shield size={24} className="text-teal-500" />
               </div>
-              <h3 className="text-2xl font-syne font-bold mb-4 tracking-tight">Clinical Support</h3>
+              <h3 className="text-2xl font-syne font-bold mb-4 tracking-tight">Need help?</h3>
               <p className="text-slate-400 text-sm leading-relaxed mb-8 font-light">
-                Need assistance with your records? Our medical orchestration team is available 24/7.
+                Something off with your records? Reach out and we'll sort it.
               </p>
-              <button className="w-full py-5 bg-teal-500 text-slate-900 rounded-2xl font-bold uppercase tracking-widest text-xs hover:bg-white transition-all duration-500 shadow-lg shadow-teal-500/20">
+              <button 
+                onClick={() => setShowContactModal(true)}
+                className="w-full py-5 bg-teal-500 text-slate-900 rounded-2xl font-bold uppercase tracking-widest text-xs hover:bg-white transition-all duration-500 shadow-lg shadow-teal-500/20"
+              >
                 Contact Support
               </button>
             </div>
@@ -341,12 +346,12 @@ export default function DashboardPage() {
           </div>
 
           <div className="bg-white rounded-[2.5rem] p-10 border border-slate-900/5 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
-            <h3 className="text-lg font-syne font-bold mb-8 tracking-tight">Network Nodes</h3>
+            <h3 className="text-lg font-syne font-bold mb-8 tracking-tight">App Status</h3>
             <div className="space-y-8">
               {[
-                { label: "Main Database", status: "Operational" },
-                { label: "Secure Vault", status: "Encrypted" },
-                { label: "Sync Engine", status: "Active" }
+                { label: "Data sync", status: "Active" },
+                { label: "Encryption", status: "On" },
+                { label: "Backup", status: "Running" }
               ].map((node, i) => (
                 <div key={i} className="flex justify-between items-center group/node">
                   <span className="text-sm font-medium text-slate-500 transition-colors group-hover/node:text-slate-900">{node.label}</span>
@@ -360,6 +365,11 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+      
+      <ContactModal 
+        isOpen={showContactModal}
+        onClose={() => setShowContactModal(false)}
+      />
     </div>
   );
 }

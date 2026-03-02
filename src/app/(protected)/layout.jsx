@@ -2,6 +2,7 @@
 
 import React from "react";
 import LoggedInNavbar from "../components/ui/LoggedInNavbar";
+import AIChatbot from "../components/ui/ChatBot";
 import { useAuth } from "@/context/AuthContext";
 import { Loader2 } from "lucide-react";
 
@@ -27,9 +28,10 @@ export default function ProtectedLayout({ children }) {
       </main>
       
       <div className="py-8 px-12 border-t border-slate-900/5 text-[10px] uppercase tracking-widest font-bold text-slate-400 flex justify-between items-center">
-        <span>MedTracker Protocol v1.0</span>
-        <span>Secure Session Active</span>
+        <span>MedTracker © 2026</span>
+        <span>Your health, your data.</span>
       </div>
+      <AIChatbot />
     </div>
   );
 }

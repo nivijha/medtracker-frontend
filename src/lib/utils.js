@@ -9,38 +9,45 @@ export function cn(...inputs) {
 
 /* ================== AXIOS INSTANCE ================== */
 const API = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000",
+  baseURL: "http://localhost:5000",
   withCredentials: true,
 });
 
 API.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.error("API ERROR DETAILS:", {
-      message: error.message,
-      code: error.code,
-      config: {
-        url: error.config?.url,
-        method: error.config?.method,
-        headers: error.config?.headers,
-      },
-      response: error.response ? {
-        status: error.response.status,
-        data: error.response.data
-      } : "NO_RESPONSE"
-    });
+    const status = error.response?.status;
 
-    if (error.response && error.response.status === 401) {
+    // 401s are expected when the user is not authenticated — don't log them
+    if (status !== 401) {
+      console.error("API ERROR DETAILS:", {
+        message: error.message,
+        code: error.code,
+        url: error.config?.url,
+        status: status,
+        responseData: error.response?.data || "NO_RESPONSE"
+      });
+      // Also log a stringified version just in case Next.js console eats the object
+      console.log("STRINGIFIED ERROR:", JSON.stringify({
+        message: error.message,
+        code: error.code,
+        url: error.config?.url,
+        status: status,
+        responseData: error.response?.data || "NO_RESPONSE"
+      }, null, 2));
+    }
+
+    if (status === 401) {
       // If we are not already on the login page or landing page, redirect
       if (typeof window !== "undefined") {
-         const { pathname } = window.location;
-         if (pathname !== "/" && !pathname.includes("/login")) {
-            window.location.href = "/login";
-         }
+        const { pathname } = window.location;
+        if (pathname !== "/" && !pathname.includes("/login")) {
+          window.location.href = "/login";
+        }
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 /* ================== AUTH APIs ================== */
@@ -105,6 +112,11 @@ export const uploadReport = async (formData) => {
 
 export const deleteReport = async (reportId) => {
   const res = await API.delete(`/api/reports/${reportId}`);
+  return res.data;
+};
+
+export const analyzeReport = async (reportId) => {
+  const res = await API.get(`/api/reports/${reportId}/analyze`);
   return res.data;
 };
 
@@ -208,6 +220,16 @@ export const rescheduleAppointment = async (id, newDateTime) => {
 export const getRecentActivity = async () => {
   const res = await API.get("/api/activity");
   return res.data || [];
+};
+
+/* ================== ChatBot API ================== */
+
+export const sendChatMessage = async (messages) => {
+  const res = await API.post("/api/chatbot/chat", {
+    messages
+  });
+
+  return res.data;
 };
 
 /* ================== EXPORT INSTANCE ================== */

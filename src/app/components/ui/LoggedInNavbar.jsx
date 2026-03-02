@@ -49,7 +49,7 @@ export default function LoggedInNavbar() {
   ];
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 h-24 flex items-center ${scrolled ? 'bg-background/80 backdrop-blur-md border-b border-slate-900/5 shadow-sm' : 'bg-transparent'}`}>
+    <nav className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 h-24 flex items-center ${scrolled ? 'bg-background/80 backdrop-blur-md border-b border-slate-900/5 shadow-sm' : 'bg-transparent'}`}>
       <div className="max-w-screen-2xl mx-auto px-6 md:px-12 flex justify-between items-center w-full">
         {/* LOGO */}
         <Link href="/dashboard" className="flex items-center gap-2 group">
@@ -155,11 +155,11 @@ export default function LoggedInNavbar() {
 
       {/* LOGOUT CONFIRMATION MODAL */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[110] px-6">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[110] px-6">
           <div className="bg-white rounded-[2.5rem] w-full max-w-md p-10 md:p-12 border border-slate-900/5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] animate-reveal-up relative">
-            <h3 className="text-2xl font-syne font-bold text-slate-900 mb-4 tracking-tight">Terminate Session?</h3>
+            <h3 className="text-2xl font-syne font-bold text-slate-900 mb-4 tracking-tight">Log out?</h3>
             <p className="text-slate-500 font-light leading-relaxed mb-10">
-              Are you sure you want to end your current clinical session? You will need to re-authenticate to access your health data.
+              You'll need to log back in to access your health data.
             </p>
 
             <div className="flex gap-4">
@@ -167,13 +167,13 @@ export default function LoggedInNavbar() {
                 onClick={() => setShowLogoutConfirm(false)}
                 className="flex-1 py-4 rounded-2xl border border-slate-900/10 font-bold uppercase tracking-widest text-[10px] hover:bg-slate-50 transition-colors"
               >
-                Stay Logged In
+                Stay logged in
               </button>
               <button
                 onClick={confirmLogout}
                 className="flex-1 py-4 rounded-2xl bg-red-500 text-white font-bold uppercase tracking-widest text-[10px] hover:bg-red-600 transition-all shadow-lg shadow-red-500/20"
               >
-                Confirm Logout
+                Yes, log out
               </button>
             </div>
           </div>

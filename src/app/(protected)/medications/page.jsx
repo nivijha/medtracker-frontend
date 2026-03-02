@@ -13,7 +13,8 @@ import {
   RotateCcw,
   Calendar,
   ChevronRight,
-  AlertCircle
+  AlertCircle,
+  Square
 } from "lucide-react";
 import {
   getMedications,
@@ -48,6 +49,13 @@ export default function MedicationsPage() {
   useEffect(() => {
     fetchMedications();
     fetchMedicationSchedule();
+
+    const handleRefresh = () => {
+      fetchMedications();
+      fetchMedicationSchedule();
+    };
+    window.addEventListener("refreshMedications", handleRefresh);
+    return () => window.removeEventListener("refreshMedications", handleRefresh);
   }, []);
 
   const fetchMedications = async () => {
@@ -121,13 +129,13 @@ export default function MedicationsPage() {
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-slate-900/10 text-[10px] font-bold uppercase tracking-widest mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
-            Pharmaceutical Ledger
+            Medications
           </div>
           <h1 className="text-4xl md:text-6xl font-syne font-bold tracking-tighter">
             Medications.
           </h1>
           <p className="text-slate-500 text-lg font-light mt-2">
-            Automated tracking of your daily clinical protocols.
+            Track your daily medications and never miss a dose.
           </p>
         </div>
 
@@ -135,7 +143,7 @@ export default function MedicationsPage() {
           onClick={() => setShowAddModal(true)}
           className="group flex items-center gap-4 bg-slate-900 text-white px-8 py-4 rounded-full hover:bg-teal-600 transition-all duration-300 transform hover:scale-105"
         >
-          <span className="text-sm font-bold uppercase tracking-widest">Register Medication</span>
+          <span className="text-sm font-bold uppercase tracking-widest">Add Medication</span>
           <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center transition-transform group-hover:rotate-90">
             <Plus size={18} />
           </div>
@@ -158,7 +166,7 @@ export default function MedicationsPage() {
             
             <div className="flex p-1.5 bg-slate-100 rounded-full border border-slate-900/5 w-fit">
               {[
-                { id: "current", label: `Current Registry (${currentMedications.length})` },
+                { id: "current", label: `Active (${currentMedications.length})` },
                 { id: "past", label: `Archived (${pastMedications.length})` }
               ].map((tab) => (
                 <button
@@ -283,9 +291,11 @@ export default function MedicationsPage() {
                       ) : (
                         <button
                           onClick={() => handleMarkTaken(item.medicationId)}
-                          className="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-teal-500 hover:text-slate-900 transition-all duration-300"
+                          className="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center border-2 border-transparent hover:bg-teal-500 hover:text-slate-900 transition-all duration-300 group/btn relative"
+                          title="Mark as taken"
                         >
-                          <ChevronRight size={16} />
+                          <Square size={16} className="absolute transition-opacity group-hover/btn:opacity-0" />
+                          <CheckCircle size={16} className="absolute opacity-0 transition-opacity group-hover/btn:opacity-100" />
                         </button>
                       )}
                     </div>
@@ -326,16 +336,13 @@ export default function MedicationsPage() {
                 </div>
               ))}
             </div>
-            <button className="w-full mt-8 py-4 bg-slate-50 text-slate-900 rounded-2xl font-bold uppercase tracking-widest text-[10px] hover:bg-slate-100 transition-colors">
-              Contact Care Provider
-            </button>
           </div>
         </div>
       </div>
 
       {/* ADD MODAL */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[100] px-6 py-12">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] px-6 py-12">
           <div className="bg-white rounded-[2.5rem] w-full max-w-2xl border border-slate-900/5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] animate-reveal-up overflow-hidden max-h-full relative flex flex-col">
             <button 
               onClick={() => setShowAddModal(false)}
@@ -346,8 +353,8 @@ export default function MedicationsPage() {
 
             <div className="overflow-y-auto p-10 md:p-16 h-full">
               <div className="mb-12">
-                <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-teal-600 mb-4">New Prescription</div>
-                <h2 className="text-4xl font-syne font-bold tracking-tighter">Initialize Medication.</h2>
+                <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-teal-600 mb-4">New Medication</div>
+                <h2 className="text-4xl font-syne font-bold tracking-tighter">Add a medication.</h2>
               </div>
 
               <form onSubmit={handleAddMedication} className="space-y-8">
@@ -398,7 +405,7 @@ export default function MedicationsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Prescribing Physician</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Prescribed by</label>
                   <input
                     required
                     value={formData.prescribedBy}
@@ -431,7 +438,7 @@ export default function MedicationsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Clinical Notes</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Notes</label>
                   <textarea
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
@@ -451,7 +458,7 @@ export default function MedicationsPage() {
                       <Loader2 className="w-6 h-6 animate-spin" />
                     ) : (
                       <>
-                        <span>Commit to Registry</span>
+                        <span>Save</span>
                         <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                       </>
                     )}

@@ -19,7 +19,7 @@ import {
   ChevronRight,
   Shield
 } from "lucide-react";
-import { getReports, uploadReport, deleteReport } from "@/lib/utils";
+import { getReports, uploadReport, deleteReport, analyzeReport } from "@/lib/utils";
 
 const ReportCard = ({ report, onView, onDownload, onDelete }) => {
   return (
@@ -150,8 +150,13 @@ export default function EnhancedReportsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [reportToDelete, setReportToDelete] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState(null);
+  const [activeReport, setActiveReport] = useState(null);
 
   const [uploading, setUploading] = useState(false);
   const [filters, setFilters] = useState({
@@ -208,8 +213,21 @@ export default function EnhancedReportsPage() {
     return matchesSearch && matchesCategory;
   });
 
-  const handleView = (report) => {
-    window.open(report.fileUrl, "_blank");
+  const handleView = async (report) => {
+    setActiveReport(report);
+    setShowAnalysisModal(true);
+    setAnalyzing(true);
+    setAnalysisResult(null);
+
+    try {
+      const res = await analyzeReport(report._id);
+      setAnalysisResult(res.summary);
+    } catch (error) {
+      console.error("Analysis Failed", error);
+      setAnalysisResult("AI Analysis failed. Please ensure the document is a readable PDF.");
+    } finally {
+      setAnalyzing(false);
+    }
   };
 
   const handleDownload = (report) => {
@@ -244,9 +262,10 @@ export default function EnhancedReportsPage() {
     try {
       setUploading(true);
       const formData = new FormData();
-      formData.append("type", uploadData.category || "report");
+      formData.append("type", uploadData.category || "other");
       formData.append("description", uploadData.description || uploadData.name);
       formData.append("doctorName", uploadData.doctor);
+      formData.append("reportDate", uploadData.date);
       formData.append("file", uploadData.file);
 
       await uploadReport(formData);
@@ -288,7 +307,7 @@ export default function EnhancedReportsPage() {
             Clinical Records.
           </h1>
           <p className="text-slate-500 text-lg font-light mt-2">
-            Secure, encrypted access to your full medical dossier.
+            All your medical documents, safe and easy to find.
           </p>
         </div>
 
@@ -296,7 +315,7 @@ export default function EnhancedReportsPage() {
           onClick={() => setShowUploadModal(true)}
           className="group flex items-center gap-4 bg-slate-900 text-white px-8 py-4 rounded-full hover:bg-teal-600 transition-all duration-300 transform hover:scale-105"
         >
-          <span className="text-sm font-bold uppercase tracking-widest">Ingest New Record</span>
+          <span className="text-sm font-bold uppercase tracking-widest">Upload Report</span>
           <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center transition-transform group-hover:rotate-180">
             <Upload size={18} />
           </div>
@@ -369,7 +388,7 @@ export default function EnhancedReportsPage() {
 
       {/* UPLOAD MODAL */}
       {showUploadModal && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[100] px-6 py-12">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] px-6 py-12">
           <div className="bg-white rounded-[2.5rem] w-full max-w-2xl border border-slate-900/5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] animate-reveal-up overflow-hidden max-h-full relative flex flex-col">
             <button 
               onClick={() => setShowUploadModal(false)}
@@ -380,14 +399,14 @@ export default function EnhancedReportsPage() {
 
             <div className="overflow-y-auto p-10 md:p-16 h-full">
               <div className="mb-12">
-                <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-teal-600 mb-4">Secure Ingestion</div>
-                <h2 className="text-4xl font-syne font-bold tracking-tighter">Register Record.</h2>
+                <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-teal-600 mb-4">Upload Report</div>
+                <h2 className="text-4xl font-syne font-bold tracking-tighter">Upload a report.</h2>
               </div>
 
               <form onSubmit={handleUpload} className="space-y-8">
                 <div className="grid md:grid-cols-2 gap-8">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Classification Name</label>
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Report Name</label>
                     <input
                       required
                       value={uploadData.name}
@@ -420,7 +439,7 @@ export default function EnhancedReportsPage() {
                     <input
                       required
                       value={uploadData.doctor}
-                      onChange={(e) => setFormData ? null : setUploadData({ ...uploadData, doctor: e.target.value })}
+                      onChange={(e) => setUploadData({ ...uploadData, doctor: e.target.value })}
                       placeholder="Dr. Elena Rossi"
                       className="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-medium"
                     />
@@ -438,7 +457,7 @@ export default function EnhancedReportsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Document Binary</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">File</label>
                   <div className="relative">
                     <input
                       type="file"
@@ -464,7 +483,7 @@ export default function EnhancedReportsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Clinical Annotations</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Notes</label>
                   <textarea
                     value={uploadData.description}
                     onChange={(e) => setUploadData({ ...uploadData, description: e.target.value })}
@@ -484,7 +503,7 @@ export default function EnhancedReportsPage() {
                       <Loader2 className="w-6 h-6 animate-spin" />
                     ) : (
                       <>
-                        <span>Commit to Vault</span>
+                        <span>Upload</span>
                         <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                       </>
                     )}
@@ -498,11 +517,11 @@ export default function EnhancedReportsPage() {
 
       {/* DELETE MODAL */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[100] px-6">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] px-6">
           <div className="bg-white rounded-[2.5rem] w-full max-w-md p-10 md:p-12 border border-slate-900/5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] animate-reveal-up relative">
-            <h3 className="text-2xl font-syne font-bold text-slate-900 mb-4 tracking-tight">Purge Record?</h3>
+            <h3 className="text-2xl font-syne font-bold text-slate-900 mb-4 tracking-tight">Delete this report?</h3>
             <p className="text-slate-500 font-light leading-relaxed mb-10">
-              You are about to permanently remove this record from the clinical vault. This action is irreversible.
+              This will permanently remove the report. This can't be undone.
             </p>
 
             <div className="flex gap-4">
@@ -516,8 +535,64 @@ export default function EnhancedReportsPage() {
                 onClick={confirmDelete}
                 className="flex-1 py-4 rounded-2xl bg-red-500 text-white font-bold uppercase tracking-widest text-[10px] hover:bg-red-600 transition-all shadow-lg shadow-red-500/20"
               >
-                Confirm Purge
+                Delete
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ANALYSIS MODAL */}
+      {showAnalysisModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] px-6 py-12">
+          <div className="bg-white rounded-[2.5rem] w-full max-w-2xl border border-slate-900/5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] animate-reveal-up overflow-hidden max-h-full relative flex flex-col">
+            <button 
+              onClick={() => setShowAnalysisModal(false)}
+              className="absolute top-8 right-8 p-3 bg-slate-50 rounded-2xl text-slate-400 hover:text-slate-900 transition-colors z-20"
+            >
+              <X size={20} />
+            </button>
+
+            <div className="overflow-y-auto p-10 md:p-16 h-full">
+              <div className="mb-8">
+                <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-teal-600 mb-4">
+                  {activeReport?.type || "Medical Analysis"}
+                </div>
+                <h2 className="text-3xl font-syne font-bold tracking-tighter">
+                  {activeReport?.description || "AI Document Summary"}
+                </h2>
+              </div>
+
+              {analyzing ? (
+                <div className="flex flex-col items-center justify-center py-20 space-y-6">
+                  <div className="relative w-16 h-16">
+                    <div className="absolute inset-0 rounded-full border-t-2 border-teal-500 animate-spin"></div>
+                    <div className="absolute inset-2 rounded-full border-r-2 border-slate-900 animate-spin-reverse"></div>
+                    <FileText className="absolute inset-0 m-auto w-6 h-6 text-slate-300" />
+                  </div>
+                  <p className="text-sm font-bold uppercase tracking-widest text-slate-400">
+                    Extracting Medical Entities...
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <div className="prose prose-slate prose-sm md:prose-base max-w-none">
+                    <textarea 
+                      readOnly
+                      value={analysisResult || ""}
+                      className="w-full h-80 px-6 py-6 bg-slate-50 border border-slate-900/10 rounded-2xl outline-none font-medium text-slate-800 resize-none leading-relaxed"
+                    />
+                  </div>
+                  <div className="flex justify-end gap-4 pt-4 border-t border-slate-900/10">
+                     <button
+                        onClick={() => window.open(activeReport.fileUrl, "_blank")}
+                        className="px-6 py-4 rounded-2xl bg-slate-100 text-slate-900 font-bold uppercase tracking-widest text-[10px] hover:bg-slate-200 transition-colors"
+                      >
+                        Open Raw PDF
+                      </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
