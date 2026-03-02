@@ -18,19 +18,23 @@ import {
   Loader2,
   ChevronRight
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getProfile, getHealthSummary } from "@/lib/utils";
 
 /* ================= SMALL UI COMPONENTS ================= */
 
-const StatCard = ({ icon: Icon, label, value, accent = "slate", tooltip }) => {
+const StatCard = ({ icon: Icon, label, value, accent = "slate", tooltip, onClick }) => {
   const accentStyles = {
     teal: "text-teal-500 bg-teal-500/10",
     slate: "text-slate-900 bg-slate-100",
   };
 
   return (
-    <div className="group p-8 bg-white rounded-[2rem] border border-slate-900/5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] transition-all duration-500 overflow-visible relative">
+    <div 
+      onClick={onClick}
+      className={`group p-8 bg-white rounded-[2rem] border border-slate-900/5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-500 overflow-visible relative ${onClick ? 'cursor-pointer hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] hover:border-teal-500/20' : ''}`}
+    >
       <div className={`p-4 rounded-2xl w-fit mb-8 transition-transform group-hover:scale-110 duration-500 ${accentStyles[accent] || accentStyles.slate}`}>
         <Icon className="w-6 h-6" />
       </div>
@@ -68,6 +72,7 @@ const InfoRow = ({ icon: Icon, label, value }) => (
 /* ================= PAGE ================= */
 
 export default function ProfilePage() {
+  const router = useRouter();
   const [user, setUser] = useState(null);
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -175,17 +180,20 @@ export default function ProfilePage() {
               icon={Calendar}
               label="Consultations"
               value={summary.appointments}
+              onClick={() => router.push('/appointments')}
             />
             <StatCard
               icon={FileText}
               label="Vault Records"
               value={summary.reports}
               accent="teal"
+              onClick={() => router.push('/reports')}
             />
             <StatCard
               icon={Activity}
               label="Active Protocols"
               value={summary.activeMedications}
+              onClick={() => router.push('/medications')}
             />
             <StatCard
               icon={Heart}

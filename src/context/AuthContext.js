@@ -64,7 +64,6 @@ export function AuthProvider({ children }) {
   }, [router]);
 
   const logout = useCallback(async () => {
-    console.log("LOGOUT INITIATED");
     try {
       await API.post("/api/auth/logout");
     } catch (err) {
@@ -81,7 +80,6 @@ export function AuthProvider({ children }) {
       // Backup clear (sometimes needed if attributes were inconsistent)
       document.cookie = `token=; path=/; ${expiry}`;
       
-      console.log("REDIRECTING TO LOGIN");
       window.location.href = "/login";
     }
   }, []);

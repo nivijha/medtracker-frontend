@@ -14,32 +14,38 @@ A modern, user-friendly medical records management system built with Next.js. Me
 - **Health Overview**: Quick stats for appointments, reports, medications, and check-ups
 - **Recent Activity Feed**: Track your latest medical activities
 - **Quick Actions**: Fast access to frequently used features
-- **Health Insights**: Personalized health recommendations
-- **Real-time Notifications**: Stay updated with important alerts
+- **Seamless Navigation**: Clickable metric cards linking directly to related health sections
+- **In-App Support**: Contact support team directly from the dashboard or landing page via a seamlessly integrated contact form
 
 ### Medical Reports
 
-- **Advanced Search**: Find reports quickly by name or content
+- **AI Medical Analysis**: Automatically extract clinical entities and structured summaries from uploaded PDFs using LLaMA models, rendered in clean Markdown.
+- **Secure Inline PDF Viewer**: Seamlessly view medical documents directly within the application via an authenticated proxy route.
+- **Interactive Report Modal**: Split-tab interface for simultaneously viewing the raw source document and the AI-generated health metrics.
+- **Advanced Search**: Find reports quickly by name, category, or doctor
 - **Smart Filters**: Filter by status, category, and date range
 - **Card-based Layout**: Clean, modern report display
 - **Status Tracking**: Monitor report status (completed, pending, reviewed)
-- **Download & View**: Easy access to your medical documents
+- **Download & Export**: Easy access to your medical documents
+
+### Medications & Prescriptions
+
+- **Active Registry**: Track current and past medications with dosage and frequency
+- **Daily Protocol**: Real-time adherence tracking with an easy check-off system
+- **Refill Management**: Monitor supply status and upcoming refill dates
+- **Pharmacy Network**: Track refill requests and verification status
+
+### Appointments
+
+- **Schedule Tracking**: View upcoming and past medical consultations
+- **Status Monitoring**: Track whether appointments are confirmed, completed, or scheduled
+- **Provider Information**: Keep track of doctors and required preparation notes
 
 ### Profile Management
 
 - **Editable Profile**: Update personal information easily
-- **Health Stats**: View your health metrics at a glance
-- **Achievement System**: Track your health milestones
-- **Recent Activity**: See your latest health-related actions
-- **Emergency Contact**: Store important contact information
-
-### Settings
-
-- **Security**: Password management and two-factor authentication
-- **Notifications**: Customize email, SMS, and push notifications
-- **Appearance**: Theme selection (Light/Dark/Auto) and font size
-- **Privacy**: Control data sharing and profile visibility
-- **Language**: English
+- **Health Stats**: View your health metrics at a glance (Wellness Coeff, Vault Records, etc.)
+- **Security Info**: Verify your account's end-to-end encryption status
 
 ## Getting Started
 
@@ -159,13 +165,13 @@ The frontend connects to a backend API for:
 
 ## Upcoming Features
 
-- [ ] Appointment scheduling
-- [ ] Medication reminders
-- [ ] Health data visualization (charts/graphs)
+- [ ] Notification System (Email/SMS/Push)
+- [ ] User Settings & Preferences (Dark Mode, 2FA, Privacy)
+- [ ] Health data visualization (advanced charts/graphs)
 - [ ] PDF report generation
-- [ ] Real-time notifications
-- [ ] Doctor-patient messaging
-- [ ] Health record sharing
+- [ ] Real-time push notifications
+- [ ] Doctor-patient in-app messaging
+- [ ] Health record sharing with family members
 
 ## Contributing
 

@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import ReactMarkdown from 'react-markdown';
 import {
   FileText,
   Search,
@@ -78,10 +80,10 @@ const ReportCard = ({ report, onView, onDownload, onDelete }) => {
         
         <button
           onClick={() => onView(report)}
-          className="group/btn flex items-center gap-2 text-teal-600 font-bold text-xs uppercase tracking-widest"
+          className="group/btn flex items-center gap-2 text-teal-600 font-bold text-[10px] md:text-xs uppercase tracking-widest"
         >
-          View Analysis
-          <ChevronRight size={14} className="transition-transform group-hover/btn:translate-x-1" />
+          PDF / Summary
+          <Eye size={14} className="transition-transform group-hover/btn:translate-x-1" />
         </button>
       </div>
       
@@ -153,10 +155,17 @@ export default function EnhancedReportsPage() {
   const [reportToDelete, setReportToDelete] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+  const [showPdfModal, setShowPdfModal] = useState(false);
+  const [activePdfUrl, setActivePdfUrl] = useState(null);
+  const [pdfBlobUrl, setPdfBlobUrl] = useState(null);
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const [pdfError, setPdfError] = useState(null); // null | 'cannotPreview' | 'generic'
+  const [activeReport, setActiveReport] = useState(null);
+  
+  // AI Summary States
+  const [activeTab, setActiveTab] = useState("pdf"); // 'pdf' | 'summary'
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
-  const [activeReport, setActiveReport] = useState(null);
 
   const [uploading, setUploading] = useState(false);
   const [filters, setFilters] = useState({
@@ -214,13 +223,52 @@ export default function EnhancedReportsPage() {
   });
 
   const handleView = async (report) => {
+    // Reset and open modal
     setActiveReport(report);
-    setShowAnalysisModal(true);
-    setAnalyzing(true);
+    setActivePdfUrl(report.fileUrl);
+    setPdfBlobUrl(null);
+    setPdfError(null);
+    setPdfLoading(true);
+    setActiveTab("pdf");
     setAnalysisResult(null);
+    setShowPdfModal(true);
 
     try {
-      const res = await analyzeReport(report._id);
+      const res = await fetch(`/api/reports/${report._id}/pdf`);
+      if (res.status === 422 || res.status === 404) {
+        setPdfError("cannotPreview");
+        return;
+      }
+      if (!res.ok) {
+        setPdfError("generic");
+        return;
+      }
+      const blob = await res.blob();
+      setPdfBlobUrl(URL.createObjectURL(blob));
+    } catch (e) {
+      console.error("PDF fetch:", e);
+      setPdfError("generic");
+    } finally {
+      setPdfLoading(false);
+    }
+  };
+
+  const handleClosePdf = () => {
+    if (pdfBlobUrl) URL.revokeObjectURL(pdfBlobUrl);
+    setShowPdfModal(false);
+    setActivePdfUrl(null);
+    setPdfBlobUrl(null);
+    setPdfError(null);
+    setActiveReport(null);
+    setActiveTab("pdf");
+    setAnalysisResult(null);
+  };
+
+  const loadSummary = async () => {
+    if (analysisResult || analyzing || !activeReport) return;
+    setAnalyzing(true);
+    try {
+      const res = await analyzeReport(activeReport._id);
       setAnalysisResult(res.summary);
     } catch (error) {
       console.error("Analysis Failed", error);
@@ -541,61 +589,134 @@ export default function EnhancedReportsPage() {
           </div>
         </div>
       )}
-
-      {/* ANALYSIS MODAL */}
-      {showAnalysisModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] px-6 py-12">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-2xl border border-slate-900/5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] animate-reveal-up overflow-hidden max-h-full relative flex flex-col">
-            <button 
-              onClick={() => setShowAnalysisModal(false)}
-              className="absolute top-8 right-8 p-3 bg-slate-50 rounded-2xl text-slate-400 hover:text-slate-900 transition-colors z-20"
-            >
-              <X size={20} />
-            </button>
-
-            <div className="overflow-y-auto p-10 md:p-16 h-full">
-              <div className="mb-8">
-                <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-teal-600 mb-4">
-                  {activeReport?.type || "Medical Analysis"}
+      {/* PDF VIEWER MODAL */}
+      {showPdfModal && activeReport && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-[110] p-4 md:p-8">
+          <div className="bg-white rounded-[2.5rem] w-full max-w-5xl h-full max-h-[90vh] border border-slate-900/5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden animate-reveal-up">
+            {/* Header */}
+              <div className="flex items-center justify-between px-8 py-5 border-b border-slate-900/5 flex-shrink-0">
+              <div className="flex items-center gap-6">
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-teal-600 mb-0.5">
+                    {activeReport.type || "Medical Report"}
+                  </div>
+                  <h2 className="text-lg font-syne font-bold text-slate-900 tracking-tight">
+                    {activeReport.description || "Clinical Document"}
+                  </h2>
                 </div>
-                <h2 className="text-3xl font-syne font-bold tracking-tighter">
-                  {activeReport?.description || "AI Document Summary"}
-                </h2>
+
+                <div className="flex bg-slate-100 p-1 rounded-xl">
+                  <button
+                    onClick={() => setActiveTab("pdf")}
+                    className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${
+                      activeTab === "pdf"
+                        ? "bg-white text-teal-600 shadow-sm"
+                        : "text-slate-400 hover:text-slate-600"
+                    }`}
+                  >
+                    Raw PDF
+                  </button>
+                  <button
+                    onClick={() => {
+                      setActiveTab("summary");
+                      loadSummary();
+                    }}
+                    className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all flex items-center gap-2 ${
+                      activeTab === "summary"
+                        ? "bg-white text-teal-600 shadow-sm"
+                        : "text-slate-400 hover:text-slate-600"
+                    }`}
+                  >
+                    AI Summary
+                  </button>
+                </div>
               </div>
 
-              {analyzing ? (
-                <div className="flex flex-col items-center justify-center py-20 space-y-6">
-                  <div className="relative w-16 h-16">
-                    <div className="absolute inset-0 rounded-full border-t-2 border-teal-500 animate-spin"></div>
-                    <div className="absolute inset-2 rounded-full border-r-2 border-slate-900 animate-spin-reverse"></div>
-                    <FileText className="absolute inset-0 m-auto w-6 h-6 text-slate-300" />
-                  </div>
-                  <p className="text-sm font-bold uppercase tracking-widest text-slate-400">
-                    Extracting Medical Entities...
-                  </p>
+              <div className="flex items-center gap-3">
+                <a
+                  href={`/api/reports/${activeReport._id}/pdf`}
+                  download={`${activeReport.description || "report"}.pdf`}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-slate-100 text-slate-700 rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-colors"
+                >
+                  <Download size={14} />
+                  Download
+                </a>
+                <button
+                  onClick={handleClosePdf}
+                  className="p-2.5 bg-slate-100 rounded-2xl text-slate-400 hover:text-slate-900 transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="flex-1 overflow-hidden rounded-b-[2.5rem] bg-slate-100 flex flex-col">
+              {activeTab === "summary" ? (
+                <div className="flex-1 overflow-y-auto p-8 md:p-12 bg-white">
+                  {analyzing ? (
+                    <div className="flex flex-col items-center justify-center py-20 space-y-6">
+                      <div className="relative w-16 h-16">
+                        <div className="absolute inset-0 rounded-full border-t-2 border-teal-500 animate-spin"></div>
+                        <div className="absolute inset-2 rounded-full border-r-2 border-slate-900 animate-spin-reverse"></div>
+                        <FileText className="absolute inset-0 m-auto w-6 h-6 text-slate-300" />
+                      </div>
+                      <p className="text-sm font-bold uppercase tracking-widest text-slate-400">
+                        Extracting Medical Entities...
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="prose prose-slate prose-sm md:prose-base max-w-none h-full bg-slate-50 border border-slate-900/10 rounded-2xl p-8 overflow-y-auto">
+                      <ReactMarkdown>{analysisResult || ""}</ReactMarkdown>
+                    </div>
+                  )}
                 </div>
               ) : (
-                <div className="space-y-6">
-                  <div className="prose prose-slate prose-sm md:prose-base max-w-none">
-                    <textarea 
-                      readOnly
-                      value={analysisResult || ""}
-                      className="w-full h-80 px-6 py-6 bg-slate-50 border border-slate-900/10 rounded-2xl outline-none font-medium text-slate-800 resize-none leading-relaxed"
+                <div className="flex-1 flex items-center justify-center">
+                  {pdfLoading ? (
+                    <div className="flex flex-col items-center gap-4">
+                      <Loader2 className="w-10 h-10 animate-spin text-teal-500" />
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Loading PDF...</span>
+                    </div>
+                  ) : pdfBlobUrl ? (
+                    <iframe
+                      src={pdfBlobUrl}
+                      title="PDF Viewer"
+                      className="w-full h-full border-0"
                     />
-                  </div>
-                  <div className="flex justify-end gap-4 pt-4 border-t border-slate-900/10">
-                     <button
-                        onClick={() => window.open(activeReport.fileUrl, "_blank")}
-                        className="px-6 py-4 rounded-2xl bg-slate-100 text-slate-900 font-bold uppercase tracking-widest text-[10px] hover:bg-slate-200 transition-colors"
+                  ) : pdfError === "cannotPreview" ? (
+                    <div className="flex flex-col items-center gap-5 text-center px-8">
+                      <div className="w-16 h-16 rounded-2xl bg-amber-50 flex items-center justify-center">
+                        <FileText className="w-8 h-8 text-amber-400" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-slate-800 mb-1">Preview unavailable</p>
+                        <p className="text-slate-400 text-sm font-light max-w-sm leading-relaxed">
+                          This report was uploaded in an older format. Please re-upload the PDF to enable inline preview.
+                        </p>
+                      </div>
+                      <a
+                        href={activePdfUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-teal-600 transition-colors"
                       >
-                        Open Raw PDF
-                      </button>
-                  </div>
+                        <Download size={14} />
+                        Open in New Tab
+                      </a>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-4">
+                      <FileText className="w-12 h-12 text-slate-200" />
+                      <span className="text-sm text-slate-400">Could not load PDF preview.</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

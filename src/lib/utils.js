@@ -27,14 +27,7 @@ API.interceptors.response.use(
         status: status,
         responseData: error.response?.data || "NO_RESPONSE"
       });
-      // Also log a stringified version just in case Next.js console eats the object
-      console.log("STRINGIFIED ERROR:", JSON.stringify({
-        message: error.message,
-        code: error.code,
-        url: error.config?.url,
-        status: status,
-        responseData: error.response?.data || "NO_RESPONSE"
-      }, null, 2));
+
     }
 
     if (status === 401) {

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import ContactModal from '@/app/components/ui/ContactModal';
 import {
   Activity,
@@ -318,9 +319,9 @@ export default function DashboardPage() {
           </div>
           {recentActivity.length > 0 && (
             <div className="p-6 bg-slate-50/50 text-center border-t border-slate-900/5">
-              <button className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 hover:text-teal-600 transition-colors">
+              <Link href="/appointments" className="block w-full text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 hover:text-teal-600 transition-colors">
                 View all
-              </button>
+              </Link>
             </div>
           )}
         </div>
