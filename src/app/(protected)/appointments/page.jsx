@@ -211,27 +211,27 @@ export default function AppointmentsPage() {
               return (
                 <div
                   key={apt._id}
-                  className={`flex items-center justify-between px-6 py-5 hover:bg-slate-50 transition-colors gap-4 ${isCancelled ? "opacity-50" : ""}`}
+                  className={`flex flex-col lg:flex-row lg:items-center justify-between px-6 py-5 hover:bg-slate-50 transition-colors gap-6 lg:gap-4 ${isCancelled ? "opacity-50" : ""}`}
                 >
                   {/* Left: icon + names */}
-                  <div className="flex items-center gap-4 min-w-0">
-                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${isCancelled ? "bg-slate-100 text-slate-400" : "bg-teal-500/10 text-teal-600"}`}>
+                  <div className="flex items-start lg:items-center gap-4 min-w-0">
+                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 mt-1 lg:mt-0 ${isCancelled ? "bg-slate-100 text-slate-400" : "bg-teal-500/10 text-teal-600"}`}>
                       <Stethoscope size={18} />
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-bold text-slate-900 text-sm">{apt.doctorName}</span>
+                        <span className="font-bold text-slate-900 text-sm lg:text-base">{apt.doctorName}</span>
                         {isCancelled && (
                           <span className="px-2 py-0.5 rounded-full bg-red-50 text-red-500 text-[8px] font-bold uppercase tracking-widest border border-red-100">
                             Cancelled
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+                      <div className="flex items-center gap-3 mt-1 flex-wrap">
                         <span className="text-xs text-slate-500">{apt.specialty || "General Medicine"}</span>
                         {apt.hospital && (
                           <>
-                            <span className="text-slate-300 text-xs">·</span>
+                            <span className="text-slate-300 text-xs hidden sm:inline">·</span>
                             <span className="text-xs text-slate-400 flex items-center gap-1">
                               <MapPin size={10} />
                               {apt.hospital}
@@ -239,11 +239,23 @@ export default function AppointmentsPage() {
                           </>
                         )}
                       </div>
+
+                      {/* Mobile Date/Time (visible only on small screens) */}
+                      <div className="flex lg:hidden items-center gap-4 mt-3">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+                          <CalendarIcon size={12} className="text-teal-500" />
+                          {dt.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+                          <Clock size={12} className="text-teal-500" />
+                          {dt.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true })}
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Middle: date + time */}
-                  <div className="hidden sm:flex items-center gap-6 shrink-0">
+                  {/* Middle: date + time (Desktop only) */}
+                  <div className="hidden lg:flex items-center gap-6 shrink-0">
                     <div className="text-right">
                       <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">Date</div>
                       <div className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
@@ -262,7 +274,7 @@ export default function AppointmentsPage() {
                   </div>
 
                   {/* Right: actions */}
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-2 shrink-0 w-full lg:w-auto mt-2 lg:mt-0 border-t lg:border-t-0 border-slate-100 pt-4 lg:pt-0">
                     {activeTab === "upcoming" && !isCancelled ? (
                       <>
                         <button

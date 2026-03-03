@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 export default function Login() {
   const { login, register } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -18,6 +19,34 @@ export default function Login() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccessMsg("");
+    setLoading(true);
+    
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+      const res = await fetch(`${apiUrl}/api/auth/forgotpassword`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: formData.email }),
+      });
+      
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || data.errors?.[0] || "Failed to send reset email");
+      }
+      
+      setSuccessMsg("Reset link sent! Please check your email inbox to proceed.");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -29,6 +58,7 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccessMsg("");
     setLoading(true);
 
     try {
@@ -59,7 +89,7 @@ export default function Login() {
       const apiError = err.response?.data;
 
       if (apiError?.errors?.length) {
-        setError(apiError.errors.join(" • "));
+        setError(apiError.errors.map(e => e.msg || e).join(" • "));
       } else {
         setError(apiError?.message || "Something went wrong");
       }
@@ -85,17 +115,19 @@ export default function Login() {
           <div className="relative z-10">
             <div className="mb-12">
               <h2 className="text-4xl font-syne font-bold tracking-tighter mb-4">
-                {isLogin ? "Access the Protocol" : "Join the Network"}
+                {isForgotPassword ? "Reset Passkey" : isLogin ? "Access the Protocol" : "Join the Network"}
               </h2>
               <p className="text-slate-500 font-light text-lg">
-                {isLogin 
-                  ? "Enter your credentials to synchronize with your health profile." 
-                  : "Initialize your secure health ecosystem today."}
+                {isForgotPassword
+                  ? "Enter your identifier to receive a secure reset link."
+                  : isLogin 
+                    ? "Enter your credentials to synchronize with your health profile." 
+                    : "Initialize your secure health ecosystem today."}
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {!isLogin && (
+            <form onSubmit={isForgotPassword ? handleForgotPassword : handleSubmit} className="space-y-8">
+              {!isLogin && !isForgotPassword && (
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Full Name</label>
@@ -146,9 +178,25 @@ export default function Login() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Secure Passkey</label>
-                <div className="relative group">
+              {!isForgotPassword && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Secure Passkey</label>
+                    {isLogin && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsForgotPassword(true);
+                          setError("");
+                          setSuccessMsg("");
+                        }}
+                        className="text-[10px] font-bold uppercase tracking-widest text-teal-600 hover:text-teal-700 transition-colors"
+                      >
+                        Forgot Passkey?
+                      </button>
+                    )}
+                  </div>
+                  <div className="relative group">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 transition-colors group-focus-within:text-teal-500" />
                   <input
                     type={showPassword ? "text" : "password"}
@@ -168,8 +216,9 @@ export default function Login() {
                   </button>
                 </div>
               </div>
+              )}
 
-              {!isLogin && (
+              {!isLogin && !isForgotPassword && (
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Confirm Passkey</label>
                   <div className="relative group">
@@ -184,6 +233,12 @@ export default function Login() {
                       required
                     />
                   </div>
+                </div>
+              )}
+
+              {successMsg && (
+                <div className="p-4 bg-teal-50 text-teal-700 rounded-2xl text-sm font-medium border border-teal-100 animate-reveal-up">
+                  {successMsg}
                 </div>
               )}
 
@@ -202,7 +257,7 @@ export default function Login() {
                   <Loader2 className="w-6 h-6 animate-spin" />
                 ) : (
                   <>
-                    <span>{isLogin ? "Sign In" : "Sign Up"}</span>
+                    <span>{isForgotPassword ? "Send Secure Link" : isLogin ? "Sign In" : "Sign Up"}</span>
                     <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                   </>
                 )}
@@ -211,13 +266,20 @@ export default function Login() {
 
             <div className="mt-12 text-center">
               <button
+                type="button"
                 onClick={() => {
-                  setIsLogin(!isLogin);
+                  if (isForgotPassword) {
+                    setIsForgotPassword(false);
+                    setIsLogin(true);
+                  } else {
+                    setIsLogin(!isLogin);
+                  }
                   setError("");
+                  setSuccessMsg("");
                 }}
                 className="text-sm font-bold uppercase tracking-widest text-slate-400 hover:text-teal-600 transition-colors"
               >
-                {isLogin ? "Need to join the network?" : "Already have clinical access?"}
+                {isForgotPassword ? "Back to Login" : isLogin ? "Need to join the network?" : "Already have clinical access?"}
               </button>
             </div>
           </div>
