@@ -40,18 +40,26 @@ export function AuthProvider({ children }) {
     const { user, token } = res.data;
     setUser(user);
     
-    router.push("/dashboard");
+    if (token) {
+      document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax`;
+    }
+    
+    window.location.href = "/dashboard";
     return res.data;
-  }, [router]);
+  }, []);
 
   const register = useCallback(async (name, email, phone, password) => {
     const res = await API.post("/api/auth/register", { name, email, phone, password });
     const { user, token } = res.data;
     setUser(user);
     
-    router.push("/dashboard");
+    if (token) {
+      document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax`;
+    }
+    
+    window.location.href = "/dashboard";
     return res.data;
-  }, [router]);
+  }, []);
 
   const logout = useCallback(async () => {
     try {
@@ -60,6 +68,7 @@ export function AuthProvider({ children }) {
       console.error("Logout API call failed", err);
     } finally {
       setUser(null);
+      document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
       window.location.href = "/login";
     }
   }, []);
