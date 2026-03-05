@@ -1,4 +1,4 @@
-# MedTracker Frontend
+# MedTracker – Medical Records Manager
 
 A modern, user-friendly medical records management system built with Next.js. MedTracker helps users manage their health information, medical reports, appointments, and personal health data in one secure location.
 
