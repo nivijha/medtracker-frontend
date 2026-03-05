@@ -601,7 +601,7 @@ export default function EnhancedReportsPage() {
       {/* PDF VIEWER MODAL */}
       {showPdfModal && activeReport && typeof document !== 'undefined' && createPortal(
         <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-[110] p-4 sm:p-8">
-          <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] w-[90vw] md:w-full max-w-5xl h-[80vh] md:h-full max-h-[80vh] md:max-h-[90vh] mx-auto border border-slate-900/5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden animate-reveal-up">
+          <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] w-[95vw] md:w-[85vw] lg:w-[70vw] max-w-4xl h-[85vh] md:h-[80vh] mx-auto border border-slate-900/5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden animate-reveal-up">
             {/* Header */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 md:px-8 py-3 md:py-5 border-b border-slate-900/5 flex-shrink-0 gap-3 relative">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6 pr-16 sm:pr-0 w-full sm:w-auto">

@@ -10,8 +10,7 @@ export async function GET(request, { params }) {
     headers["Cookie"] = `${token.name}=${token.value}`;
   }
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-  const backendRes = await fetch(`${apiUrl}/api/reports/${id}/pdf`, {
+  const backendRes = await fetch(`http://localhost:5000/api/reports/${id}/pdf`, {
     headers,
     credentials: "include",
   });
