@@ -591,11 +591,11 @@ export default function EnhancedReportsPage() {
       )}
       {/* PDF VIEWER MODAL */}
       {showPdfModal && activeReport && typeof document !== 'undefined' && createPortal(
-        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-[110] p-4 md:p-8">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-5xl h-full max-h-[90vh] border border-slate-900/5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden animate-reveal-up">
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-[110] p-4 sm:p-8">
+          <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] w-[90vw] md:w-full max-w-5xl h-[80vh] md:h-full max-h-[80vh] md:max-h-[90vh] mx-auto border border-slate-900/5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden animate-reveal-up">
             {/* Header */}
-              <div className="flex flex-col sm:flex-row items-center justify-between px-4 md:px-8 py-3 md:py-5 border-b border-slate-900/5 flex-shrink-0 gap-3">
-              <div className="flex items-center gap-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 md:px-8 py-3 md:py-5 border-b border-slate-900/5 flex-shrink-0 gap-3 relative">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6 pr-16 sm:pr-0 w-full sm:w-auto">
                 <div className="flex-shrink-0">
                   <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-teal-600 mb-0.5">
                     {activeReport.type || "Medical Report"}
@@ -632,11 +632,11 @@ export default function EnhancedReportsPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 absolute top-3 right-3 sm:static sm:top-auto sm:right-auto">
                 <a
                   href={`/api/reports/${activeReport._id}/pdf`}
                   download={`${activeReport.description || "report"}.pdf`}
-                  className="flex items-center justify-center gap-2 px-3.5 md:px-5 py-2.5 bg-slate-100 text-slate-700 rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-colors"
+                  className="flex items-center justify-center gap-2 px-2 md:px-5 py-2 md:py-2.5 bg-slate-100 text-slate-700 rounded-[1rem] md:rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-colors"
                   title="Download PDF"
                 >
                   <Download size={14} />
@@ -644,9 +644,9 @@ export default function EnhancedReportsPage() {
                 </a>
                 <button
                   onClick={handleClosePdf}
-                  className="p-2.5 bg-slate-100 rounded-2xl text-slate-400 hover:text-slate-900 transition-colors"
+                  className="p-2 md:p-2.5 bg-slate-100 rounded-[1rem] md:rounded-2xl text-slate-400 hover:text-slate-900 transition-colors"
                 >
-                  <X size={20} />
+                  <X size={16} className="w-4 h-4 md:w-5 md:h-5" />
                 </button>
               </div>
             </div>
