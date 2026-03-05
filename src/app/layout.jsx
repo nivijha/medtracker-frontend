@@ -28,6 +28,7 @@ export default function RootLayout({ children }) {
       <head>
         <link rel="icon" href="/favicon.ico" />
         <script src="https://accounts.google.com/gsi/client" async defer></script>
+        <meta name="google-site-verification" content="YSYlbkdAWuoCfIstO0E8a3VLL59FgkcLvYd1oL7qW8A" />
       </head>
       <body className="font-hanken antialiased bg-[#FAF9F6] text-[#1A2A3A]">
         <AuthProvider>

@@ -59,11 +59,15 @@ const ReportCard = ({ report, onView, onDownload, onDelete }) => {
               {report.reportDate ? new Date(report.reportDate).toLocaleDateString("en-IN", { month: 'short', year: 'numeric' }) : "Archive"}
             </span>
           </div>
-          <h3 className="text-xl font-syne font-bold text-slate-900 tracking-tight leading-tight">
-            {(report.description && report.description.includes(':::') ? report.description.split(':::')[0] : report.description) || report.type || "Medical Analysis"}
+          <h3 className="text-xl font-syne font-bold text-slate-900 tracking-tight leading-tight capitalize">
+            {report.description && report.description.includes(':::') 
+              ? report.description.split(':::')[0] 
+              : (report.type ? `${report.type} Report` : "Medical Report")}
           </h3>
           <p className="text-xs text-slate-500 font-light line-clamp-2 leading-relaxed">
-            {(report.description && report.description.includes(':::') ? report.description.split(':::')[1] : null) || "No additional clinical annotations provided for this record."}
+            {report.description && report.description.includes(':::') 
+              ? (report.description.split(':::')[1] || "No clinical annotations provided.")
+              : (report.description || "No clinical annotations provided.")}
           </p>
         </div>
       </div>
@@ -312,9 +316,9 @@ export default function EnhancedReportsPage() {
       const formData = new FormData();
       formData.append("type", uploadData.category || "other");
       
-      const combinedDesc = uploadData.description 
-        ? `${uploadData.name}:::${uploadData.description}` 
-        : uploadData.name;
+      const reportName = uploadData.name || "Medical Report";
+      const reportNotes = uploadData.description || "";
+      const combinedDesc = `${reportName}:::${reportNotes}`;
         
       formData.append("description", combinedDesc);
       formData.append("doctorName", uploadData.doctor);
@@ -605,8 +609,10 @@ export default function EnhancedReportsPage() {
                   <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-teal-600 mb-0.5">
                     {activeReport.type || "Medical Report"}
                   </div>
-                  <h2 className="text-sm md:text-lg font-syne font-bold text-slate-900 tracking-tight">
-                    {(activeReport.description && activeReport.description.includes(':::') ? activeReport.description.split(':::')[0] : activeReport.description) || "Clinical Document"}
+                  <h2 className="text-sm md:text-lg font-syne font-bold text-slate-900 tracking-tight capitalize">
+                    {activeReport.description && activeReport.description.includes(':::') 
+                      ? activeReport.description.split(':::')[0] 
+                      : (activeReport.type ? `${activeReport.type} Report` : "Clinical Document")}
                   </h2>
                 </div>
 
