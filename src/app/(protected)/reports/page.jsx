@@ -361,7 +361,7 @@ export default function EnhancedReportsPage() {
 
         <button
           onClick={() => setShowUploadModal(true)}
-          className="group flex items-center gap-4 bg-slate-900 text-white px-8 py-4 rounded-full hover:bg-teal-600 transition-all duration-300 transform hover:scale-105"
+          className="group w-full md:w-auto flex items-center justify-between gap-4 bg-slate-900 text-white px-8 py-4 rounded-full hover:bg-teal-600 transition-all duration-300 transform hover:scale-105"
         >
           <span className="text-sm font-bold uppercase tracking-widest">Upload Report</span>
           <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center transition-transform group-hover:rotate-180">

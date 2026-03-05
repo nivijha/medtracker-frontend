@@ -227,12 +227,15 @@ export default function DashboardPage() {
 
         <button
           onClick={() => router.push("/profile")}
-          className="group flex items-center gap-4 p-2 pl-4 pr-6 bg-white border border-slate-900/5 rounded-full hover:border-teal-500 transition-all duration-300 shadow-xl shadow-slate-900/5 animate-reveal-up [animation-delay:200ms]"
+          className="group w-full md:w-auto flex items-center justify-between gap-4 p-2 pl-4 pr-6 bg-white border border-slate-900/5 rounded-full hover:border-teal-500 transition-all duration-300 shadow-xl shadow-slate-900/5 animate-reveal-up [animation-delay:200ms]"
         >
-          <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center transition-colors group-hover:bg-teal-500 group-hover:text-white">
-            <User size={20} />
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center transition-colors group-hover:bg-teal-500 group-hover:text-white">
+              <User size={20} />
+            </div>
+            <span className="text-sm font-bold uppercase tracking-widest">View Profile</span>
           </div>
-          <span className="text-sm font-bold uppercase tracking-widest">View Profile</span>
+          <ChevronRight size={16} className="text-slate-400 group-hover:text-teal-500 transition-colors md:hidden" />
         </button>
       </div>
 
