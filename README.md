@@ -1,11 +1,17 @@
 # MedTracker – Medical Records Manager
 
-A modern, user-friendly medical records management system built with Next.js. MedTracker helps users manage their health information, medical reports, appointments, and personal health data in one secure location.
+MedTracker is a full-stack digital health platform designed to help patients and healthcare providers securely manage medical records, prescriptions, and diagnostic reports in one centralized system.
+
+The application enables users to upload, organize, and access medical information through an intuitive web interface, improving accessibility and continuity of care.
+
+The project demonstrates the development of a scalable healthcare application using modern full-stack technologies.
 
 ![Next.js](https://img.shields.io/badge/Next.js-16.0.1-black)
 ![React](https://img.shields.io/badge/React-18-blue)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.0-38bdf8)
 ![License](https://img.shields.io/badge/license-MIT-green)
+
+<img width="1649" height="1310" alt="Site-View" src="./demo_ss.png" />
 
 ## Features
 
@@ -46,6 +52,20 @@ A modern, user-friendly medical records management system built with Next.js. Me
 - **Editable Profile**: Update personal information easily
 - **Health Stats**: View your health metrics at a glance (Wellness Coeff, Vault Records, etc.)
 - **Security Info**: Verify your account's end-to-end encryption status
+
+## System Architecture
+
+```
+User
+ ↓
+React Frontend
+ ↓
+REST API (Node.js + Express)
+ ↓
+MongoDB Database
+ ↓
+Medical Records Storage
+```
 
 ## Getting Started
 
