@@ -60,7 +60,7 @@ const ReportCard = ({ report, onView, onDownload, onDelete }) => {
             </span>
           </div>
           <h3 className="text-xl font-syne font-bold text-slate-900 tracking-tight leading-tight">
-            {report.description || report.type || "Medical Analysis"}
+            {report.name || report.fileName || report.title || report.description || report.type || "Medical Analysis"}
           </h3>
           <p className="text-xs text-slate-500 font-light line-clamp-2 leading-relaxed">
             {report.fileDescription || "No additional clinical annotations provided for this record."}
@@ -601,7 +601,7 @@ export default function EnhancedReportsPage() {
                     {activeReport.type || "Medical Report"}
                   </div>
                   <h2 className="text-sm md:text-lg font-syne font-bold text-slate-900 tracking-tight">
-                    {activeReport.description || "Clinical Document"}
+                    {activeReport.name || activeReport.fileName || activeReport.title || activeReport.description || "Clinical Document"}
                   </h2>
                 </div>
 
