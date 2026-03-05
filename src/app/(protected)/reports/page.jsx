@@ -60,10 +60,10 @@ const ReportCard = ({ report, onView, onDownload, onDelete }) => {
             </span>
           </div>
           <h3 className="text-xl font-syne font-bold text-slate-900 tracking-tight leading-tight">
-            {report.name || report.fileName || report.title || report.description || report.type || "Medical Analysis"}
+            {(report.description && report.description.includes(':::') ? report.description.split(':::')[0] : report.description) || report.type || "Medical Analysis"}
           </h3>
           <p className="text-xs text-slate-500 font-light line-clamp-2 leading-relaxed">
-            {report.fileDescription || "No additional clinical annotations provided for this record."}
+            {(report.description && report.description.includes(':::') ? report.description.split(':::')[1] : null) || "No additional clinical annotations provided for this record."}
           </p>
         </div>
       </div>
@@ -311,7 +311,12 @@ export default function EnhancedReportsPage() {
       setUploading(true);
       const formData = new FormData();
       formData.append("type", uploadData.category || "other");
-      formData.append("description", uploadData.description || uploadData.name);
+      
+      const combinedDesc = uploadData.description 
+        ? `${uploadData.name}:::${uploadData.description}` 
+        : uploadData.name;
+        
+      formData.append("description", combinedDesc);
       formData.append("doctorName", uploadData.doctor);
       formData.append("reportDate", uploadData.date);
       formData.append("file", uploadData.file);
@@ -601,7 +606,7 @@ export default function EnhancedReportsPage() {
                     {activeReport.type || "Medical Report"}
                   </div>
                   <h2 className="text-sm md:text-lg font-syne font-bold text-slate-900 tracking-tight">
-                    {activeReport.name || activeReport.fileName || activeReport.title || activeReport.description || "Clinical Document"}
+                    {(activeReport.description && activeReport.description.includes(':::') ? activeReport.description.split(':::')[0] : activeReport.description) || "Clinical Document"}
                   </h2>
                 </div>
 
