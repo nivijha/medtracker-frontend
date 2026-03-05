@@ -8,6 +8,7 @@ const AuthContext = createContext({
   user: null,
   loading: true,
   login: async () => {},
+  googleLogin: async () => {},
   logout: () => {},
   register: async () => {},
   updateUser: () => {},
@@ -37,6 +38,19 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async (email, password) => {
     const res = await API.post("/api/auth/login", { email, password });
+    const { user, token } = res.data;
+    setUser(user);
+    
+    if (token) {
+      document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax`;
+    }
+    
+    window.location.href = "/dashboard";
+    return res.data;
+  }, []);
+
+  const googleLogin = useCallback(async (credential) => {
+    const res = await API.post("/api/auth/google", { credential });
     const { user, token } = res.data;
     setUser(user);
     
@@ -81,6 +95,7 @@ export function AuthProvider({ children }) {
     user,
     loading,
     login,
+    googleLogin,
     logout,
     register,
     updateUser,

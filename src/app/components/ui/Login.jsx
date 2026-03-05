@@ -6,10 +6,53 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 
 export default function Login() {
-  const { login, register } = useAuth();
+  const { login, register, googleLogin } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  
+  // Initialize Google Login
+  React.useEffect(() => {
+    let interval;
+    
+    const initGoogle = () => {
+      if (typeof window !== "undefined" && window.google && document.getElementById("googleBtn")) {
+        const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "703875323565-d0g4f0g0f0g0f0g0f0g0f0g0f0g0f0g0.apps.googleusercontent.com";
+        
+        try {
+          window.google.accounts.id.initialize({
+            client_id: clientId,
+            callback: (response) => {
+              setLoading(true);
+              googleLogin(response.credential).catch(err => {
+                setError(err.response?.data?.message || "Google login failed");
+                setLoading(false);
+              });
+            }
+          });
+
+          window.google.accounts.id.renderButton(
+            document.getElementById("googleBtn"),
+            { theme: "outline", size: "large", width: "100%", shape: "pill" }
+          );
+          
+          if (interval) clearInterval(interval);
+        } catch (err) {
+          console.error("Google Init Error:", err);
+        }
+      }
+    };
+
+    // Try immediately
+    initGoogle();
+
+    // Also poll for a few seconds in case the script is still loading
+    interval = setInterval(initGoogle, 1000);
+    setTimeout(() => clearInterval(interval), 5000);
+
+    return () => clearInterval(interval);
+  }, [googleLogin, isLogin, isForgotPassword]);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -182,19 +225,6 @@ export default function Login() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Secure Passkey</label>
-                    {isLogin && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsForgotPassword(true);
-                          setError("");
-                          setSuccessMsg("");
-                        }}
-                        className="text-[10px] font-bold uppercase tracking-widest text-teal-600 hover:text-teal-700 transition-colors"
-                      >
-                        Forgot Passkey?
-                      </button>
-                    )}
                   </div>
                   <div className="relative group">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 transition-colors group-focus-within:text-teal-500" />
@@ -262,6 +292,18 @@ export default function Login() {
                   </>
                 )}
               </button>
+
+              {!isForgotPassword && (
+                <>
+                  <div className="relative py-4 flex items-center">
+                    <div className="flex-grow border-t border-slate-200"></div>
+                    <span className="flex-shrink mx-4 text-slate-400 text-[10px] font-bold uppercase tracking-widest">OR</span>
+                    <div className="flex-grow border-t border-slate-200"></div>
+                  </div>
+
+                  <div id="googleBtn" className="w-full flex justify-center"></div>
+                </>
+              )}
             </form>
 
             <div className="mt-12 text-center">
