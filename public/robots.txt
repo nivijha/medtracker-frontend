@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://medtracker-frontend.vercel.app/sitemap.xml
