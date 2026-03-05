@@ -49,7 +49,7 @@ export default function LoggedInNavbar() {
   ];
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 h-24 flex items-center ${scrolled ? 'bg-background/80 backdrop-blur-md border-b border-slate-900/5 shadow-sm' : 'bg-transparent'}`}>
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 h-24 flex items-center ${scrolled ? 'bg-background/80 backdrop-blur-md border-b border-slate-900/5 shadow-sm' : 'bg-transparent'}`}>
       <div className="max-w-screen-2xl mx-auto px-6 md:px-12 flex justify-between items-center w-full">
         {/* LOGO */}
         <Link href="/dashboard" className="flex items-center gap-2 group">
@@ -112,67 +112,51 @@ export default function LoggedInNavbar() {
 
       {/* MOBILE DROPDOWN */}
       {menuOpen && (
-        <div className="fixed inset-0 z-50 bg-[#FAF9F6] flex flex-col md:hidden">
-          {/* Mobile Header with Close Button */}
-          <div className="h-24 px-6 flex items-center justify-between border-b border-slate-900/5">
-            <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-slate-900 rounded-full flex items-center justify-center">
-                <Plus className="text-teal-500 w-5 h-5" />
-              </div>
-              <span className="text-xl font-syne font-bold tracking-tight">MedTracker</span>
-            </Link>
-            <button onClick={() => setMenuOpen(false)} className="p-2 text-slate-900">
-              <X size={24} />
-            </button>
-          </div>
-
-          <div className="flex-1 overflow-y-auto px-8 py-12 flex flex-col">
-            <div className="flex flex-col gap-2">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.path}
-                  href={link.path}
-                  onClick={() => setMenuOpen(false)}
-                  className={`text-4xl font-syne font-bold py-4 flex items-center justify-between group transition-all ${isActive(link.path) ? 'text-teal-500 underline decoration-4 underline-offset-8' : 'text-slate-900 hover:translate-x-2'}`}
-                >
-                  <span>{link.name}</span>
-                  <ArrowUpRight className={`w-8 h-8 transition-colors ${isActive(link.path) ? 'text-teal-500' : 'text-slate-200 group-hover:text-teal-500'}`} />
-                </Link>
-              ))}
-            </div>
-            
-            <div className="mt-auto pt-12 border-t border-slate-900/5 flex flex-col gap-6">
-              {user && (
-                <Link
-                  href="/profile"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-4 group bg-slate-50 p-6 rounded-3xl border border-slate-900/5"
-                >
-                  <div className="w-14 h-14 bg-slate-900 text-white rounded-2xl flex items-center justify-center font-bold text-2xl group-hover:bg-teal-500 transition-colors">
-                    {user.name?.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Current Profile</div>
-                    <div className="text-2xl font-syne font-bold text-slate-900">{user.name}</div>
-                  </div>
-                </Link>
-              )}
-              
-              <button
-                onClick={handleLogoutClick}
-                className="flex items-center justify-between w-full p-6 bg-red-50 text-red-600 rounded-3xl font-bold uppercase tracking-widest text-sm hover:bg-red-100 transition-colors"
+        <div className="fixed inset-0 z-[210] bg-background flex flex-col p-8 pt-24 animate-fade-in md:hidden">
+          <div className="flex flex-col gap-6">
+            {navLinks.map((link) => (
+              <Link
+                key={link.path}
+                href={link.path}
+                onClick={() => setMenuOpen(false)}
+                className={`text-3xl font-syne font-bold transition-colors ${isActive(link.path) ? 'text-teal-500' : 'text-slate-900'}`}
               >
-                <span>Terminate Session</span>
-                <LogOut size={20} />
-              </button>
-            </div>
+                {link.name}
+              </Link>
+            ))}
+          </div>
+          
+          <div className="mt-auto flex flex-col gap-6">
+            {user && (
+              <Link
+                href="/profile"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-4 border-b border-slate-900/5 pb-6"
+              >
+                <div className="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center font-bold text-xl">
+                  {user.name?.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Current Profile</div>
+                  <div className="text-xl font-syne font-bold text-slate-900">{user.name}</div>
+                </div>
+              </Link>
+            )}
+            
+            <button
+              onClick={handleLogoutClick}
+              className="bg-slate-900 text-white py-4 rounded-2xl text-center font-bold flex items-center justify-center gap-3 hover:bg-red-600 transition-colors"
+            >
+              Terminate Session
+              <LogOut size={20} />
+            </button>
           </div>
         </div>
       )}
 
       {/* LOGOUT CONFIRMATION MODAL */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[110] px-6">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[220] px-6">
           <div className="bg-white rounded-[2.5rem] w-full max-w-md p-10 md:p-12 border border-slate-900/5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] animate-reveal-up relative">
             <h3 className="text-2xl font-syne font-bold text-slate-900 mb-4 tracking-tight">Log out?</h3>
             <p className="text-slate-500 font-light leading-relaxed mb-10">
