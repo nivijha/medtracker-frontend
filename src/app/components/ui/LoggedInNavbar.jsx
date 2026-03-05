@@ -112,43 +112,60 @@ export default function LoggedInNavbar() {
 
       {/* MOBILE DROPDOWN */}
       {menuOpen && (
-        <div className="fixed inset-0 z-40 bg-background flex flex-col p-8 pt-24 animate-fade-in md:hidden">
-          {navLinks.map((link) => (
-            <Link
-              key={link.path}
-              href={link.path}
-              onClick={() => setMenuOpen(false)}
-              className={`text-4xl font-syne font-bold mb-6 flex items-center justify-between group ${isActive(link.path) ? 'text-teal-500' : 'text-slate-900'}`}
-            >
-              <span>{link.name}</span>
-              <ArrowUpRight className="w-8 h-8 text-slate-200 group-hover:text-teal-500 transition-colors" />
+        <div className="fixed inset-0 z-50 bg-[#FAF9F6] flex flex-col md:hidden">
+          {/* Mobile Header with Close Button */}
+          <div className="h-24 px-6 flex items-center justify-between border-b border-slate-900/5">
+            <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-slate-900 rounded-full flex items-center justify-center">
+                <Plus className="text-teal-500 w-5 h-5" />
+              </div>
+              <span className="text-xl font-syne font-bold tracking-tight">MedTracker</span>
             </Link>
-          ))}
-          
-          <div className="mt-auto pt-8 border-t border-slate-900/5 flex flex-col gap-6">
-            {user && (
-              <Link
-                href="/profile"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-4 group"
-              >
-                <div className="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center font-bold text-xl">
-                  {user.name?.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <div className="text-xs font-bold uppercase tracking-widest text-slate-400">Current Profile</div>
-                  <div className="text-2xl font-syne font-bold">{user.name}</div>
-                </div>
-              </Link>
-            )}
-            
-            <button
-              onClick={handleLogoutClick}
-              className="flex items-center justify-between w-full p-6 bg-red-50 text-red-600 rounded-3xl font-bold uppercase tracking-widest text-sm"
-            >
-              <span>Terminate Session</span>
-              <LogOut size={20} />
+            <button onClick={() => setMenuOpen(false)} className="p-2 text-slate-900">
+              <X size={24} />
             </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto px-8 py-12 flex flex-col">
+            <div className="flex flex-col gap-2">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.path}
+                  href={link.path}
+                  onClick={() => setMenuOpen(false)}
+                  className={`text-4xl font-syne font-bold py-4 flex items-center justify-between group transition-all ${isActive(link.path) ? 'text-teal-500 underline decoration-4 underline-offset-8' : 'text-slate-900 hover:translate-x-2'}`}
+                >
+                  <span>{link.name}</span>
+                  <ArrowUpRight className={`w-8 h-8 transition-colors ${isActive(link.path) ? 'text-teal-500' : 'text-slate-200 group-hover:text-teal-500'}`} />
+                </Link>
+              ))}
+            </div>
+            
+            <div className="mt-auto pt-12 border-t border-slate-900/5 flex flex-col gap-6">
+              {user && (
+                <Link
+                  href="/profile"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-4 group bg-slate-50 p-6 rounded-3xl border border-slate-900/5"
+                >
+                  <div className="w-14 h-14 bg-slate-900 text-white rounded-2xl flex items-center justify-center font-bold text-2xl group-hover:bg-teal-500 transition-colors">
+                    {user.name?.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Current Profile</div>
+                    <div className="text-2xl font-syne font-bold text-slate-900">{user.name}</div>
+                  </div>
+                </Link>
+              )}
+              
+              <button
+                onClick={handleLogoutClick}
+                className="flex items-center justify-between w-full p-6 bg-red-50 text-red-600 rounded-3xl font-bold uppercase tracking-widest text-sm hover:bg-red-100 transition-colors"
+              >
+                <span>Terminate Session</span>
+                <LogOut size={20} />
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -409,7 +409,7 @@ export default function LandingPage() {
             >
               Contact Us
             </button>
-            <a href="mailto:support@medtracker.app" className="text-sm text-slate-600 hover:text-teal-600 transition-colors">support@medtracker.app</a>
+            <a href="mailto:support@medtracker.app" className="text-sm text-slate-600 hover:text-teal-600 transition-colors"></a>
           </div>
         </div>
 
