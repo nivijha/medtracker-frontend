@@ -49,7 +49,7 @@ export default function LoggedInNavbar() {
   ];
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-[1000] transition-all duration-300 h-24 flex items-center ${menuOpen ? 'bg-[#FAF9F6]' : scrolled ? 'bg-background/80 backdrop-blur-md border-b border-slate-900/5 shadow-sm' : 'bg-background'}`}>
+    <nav className={`fixed top-0 left-0 right-0 z-[1000] transition-all duration-300 h-20 flex items-center ${menuOpen ? 'bg-[#FAF9F6]' : scrolled ? 'bg-background/80 backdrop-blur-md border-b border-slate-900/5 shadow-sm' : 'bg-background'}`}>
       <div className="max-w-screen-2xl mx-auto px-6 md:px-12 flex justify-between items-center w-full relative z-[1001]">
         {/* LOGO */}
         <Link href="/dashboard" className="flex items-center gap-2 group">
@@ -147,7 +147,7 @@ export default function LoggedInNavbar() {
               onClick={handleLogoutClick}
               className="bg-slate-900 text-white py-4 rounded-2xl text-center font-bold flex items-center justify-center gap-3 hover:bg-red-600 transition-colors"
             >
-              Terminate Session
+              Logout
               <LogOut size={20} />
             </button>
           </div>

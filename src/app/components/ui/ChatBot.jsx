@@ -87,8 +87,8 @@ What would you like to do today?`,
     <>
       {/* NOTIFICATION POPUP */}
       {showPopup && !open && (
-        <div className="fixed bottom-24 right-6 z-[200] animate-in slide-in-from-bottom-4 fade-in duration-300">
-          <div className="relative bg-slate-900 text-white rounded-2xl rounded-br-sm px-4 py-3 shadow-2xl max-w-[220px]">
+        <div className="fixed bottom-24 right-4 md:right-6 z-[200] animate-in slide-in-from-bottom-4 fade-in duration-300">
+          <div className="relative bg-slate-900 text-white rounded-2xl rounded-br-sm px-3 md:px-4 py-2.5 md:py-3 shadow-2xl max-w-[180px] md:max-w-[220px]">
             {/* Close button */}
             <button
               onClick={() => setShowPopup(false)}
@@ -124,7 +124,7 @@ What would you like to do today?`,
 
       {/* CHAT WINDOW */}
       {open && (
-        <div className="fixed bottom-24 right-6 w-[360px] h-[480px] bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden z-[200]">
+        <div className="fixed bottom-20 md:bottom-24 right-4 md:right-6 w-[calc(100vw-2rem)] md:w-[360px] h-[70vh] md:h-[480px] max-h-[600px] bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden z-[200]">
           {/* HEADER */}
           <div className="p-4 bg-slate-900 flex items-center justify-between">
             <div className="flex items-center gap-2">

@@ -63,7 +63,7 @@ const InfoRow = ({ icon: Icon, label, value }) => (
     <div>
       <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">{label}</p>
       <p className="text-lg font-bold text-slate-900 break-words tracking-tight">
-        {value || "Protocol Undefined"}
+        {value || "Not provided"}
       </p>
     </div>
   </div>

@@ -21,7 +21,7 @@ export default function ProtectedLayout({ children }) {
     <div className="min-h-screen bg-background text-slate-900 bg-grain flex flex-col selection:bg-teal-500/30">
       <LoggedInNavbar />
 
-      <main className="flex-1 px-6 md:px-12 pt-24 pb-10 md:pb-16">
+      <main className="flex-1 px-6 md:px-12 pt-20 pb-10 md:pb-16">
         <div className="max-w-screen-2xl mx-auto w-full animate-reveal-up">
           {children}
         </div>

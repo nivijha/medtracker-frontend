@@ -594,21 +594,21 @@ export default function EnhancedReportsPage() {
         <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-[110] p-4 md:p-8">
           <div className="bg-white rounded-[2.5rem] w-full max-w-5xl h-full max-h-[90vh] border border-slate-900/5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden animate-reveal-up">
             {/* Header */}
-              <div className="flex items-center justify-between px-8 py-5 border-b border-slate-900/5 flex-shrink-0">
+              <div className="flex items-center justify-between px-4 md:px-8 py-4 md:py-5 border-b border-slate-900/5 flex-shrink-0">
               <div className="flex items-center gap-6">
                 <div>
                   <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-teal-600 mb-0.5">
                     {activeReport.type || "Medical Report"}
                   </div>
-                  <h2 className="text-lg font-syne font-bold text-slate-900 tracking-tight">
+                  <h2 className="text-sm md:text-lg font-syne font-bold text-slate-900 tracking-tight">
                     {activeReport.description || "Clinical Document"}
                   </h2>
                 </div>
 
-                <div className="flex bg-slate-100 p-1 rounded-xl">
+                <div className="flex bg-slate-100 p-1 rounded-xl scale-90 md:scale-100 origin-left">
                   <button
                     onClick={() => setActiveTab("pdf")}
-                    className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${
+                    className={`px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-[10px] md:text-xs font-bold uppercase tracking-widest transition-all ${
                       activeTab === "pdf"
                         ? "bg-white text-teal-600 shadow-sm"
                         : "text-slate-400 hover:text-slate-600"
@@ -621,7 +621,7 @@ export default function EnhancedReportsPage() {
                       setActiveTab("summary");
                       loadSummary();
                     }}
-                    className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all flex items-center gap-2 ${
+                    className={`px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-[10px] md:text-xs font-bold uppercase tracking-widest transition-all flex items-center gap-2 ${
                       activeTab === "summary"
                         ? "bg-white text-teal-600 shadow-sm"
                         : "text-slate-400 hover:text-slate-600"
