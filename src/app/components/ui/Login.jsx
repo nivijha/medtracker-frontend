@@ -33,7 +33,12 @@ export default function Login() {
 
           window.google.accounts.id.renderButton(
             document.getElementById("googleBtn"),
-            { theme: "outline", size: "large", width: "100%", shape: "pill" }
+            { 
+              theme: "outline", 
+              size: "large", 
+              width: typeof window !== "undefined" && window.innerWidth < 400 ? window.innerWidth - 64 : 350, 
+              shape: "pill" 
+            }
           );
           
           if (interval) clearInterval(interval);
@@ -151,7 +156,7 @@ export default function Login() {
           <span className="text-3xl font-syne font-bold tracking-tight">MedTracker</span>
         </Link>
 
-        <div className="bg-white rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.05)] p-10 md:p-16 border border-slate-900/5 relative overflow-hidden">
+        <div className="bg-white rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.05)] p-6 sm:p-10 md:p-16 border border-slate-900/5 relative overflow-hidden">
           {/* Subtle decorative background element */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/5 rounded-bl-[5rem]" />
 
@@ -301,7 +306,7 @@ export default function Login() {
                     <div className="flex-grow border-t border-slate-200"></div>
                   </div>
 
-                  <div id="googleBtn" className="w-full flex justify-center"></div>
+                  <div id="googleBtn" className="w-full flex justify-center min-h-[50px]"></div>
                 </>
               )}
             </form>

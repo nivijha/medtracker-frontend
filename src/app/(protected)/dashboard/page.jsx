@@ -277,7 +277,7 @@ export default function DashboardPage() {
       {/* RECENT ACTIVITY & SYSTEM LOGS */}
       <div className="grid lg:grid-cols-12 gap-10 relative z-10">
         <div className="lg:col-span-8 bg-white rounded-[2.5rem] border border-slate-900/5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden">
-          <div className="p-10 border-b border-slate-900/5 flex justify-between items-center bg-slate-50/30">
+          <div className="p-6 sm:p-10 border-b border-slate-900/5 flex justify-between items-center bg-slate-50/30">
             <div>
               <h2 className="text-2xl font-syne font-bold tracking-tight">Recent Activity</h2>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mt-1">
@@ -327,7 +327,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="lg:col-span-4 space-y-6">
-          <div className="bg-slate-900 text-white rounded-[2.5rem] p-10 relative overflow-hidden group shadow-2xl shadow-slate-900/20">
+          <div className="bg-slate-900 text-white rounded-[2.5rem] p-6 sm:p-10 relative overflow-hidden group shadow-2xl shadow-slate-900/20">
             <div className="relative z-10">
               <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mb-8 border border-white/5">
                 <Shield size={24} className="text-teal-500" />

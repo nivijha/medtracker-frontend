@@ -209,7 +209,7 @@ export default function LandingPage() {
 
           <div className="grid md:grid-cols-3 xl:grid-cols-5 gap-px bg-slate-800 border border-slate-800 overflow-hidden rounded-3xl">
             {features.map((feature, i) => (
-              <div key={i} className="p-10 bg-slate-900 group hover:bg-slate-800 transition-colors duration-500">
+              <div key={i} className="p-6 sm:p-10 bg-slate-900 group hover:bg-slate-800 transition-colors duration-500">
                 <div className="w-12 h-12 rounded-2xl bg-teal-500/10 flex items-center justify-center text-teal-500 mb-8 group-hover:scale-110 transition-transform duration-500">
                   {feature.icon}
                 </div>

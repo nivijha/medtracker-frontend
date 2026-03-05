@@ -165,6 +165,7 @@ The frontend connects to a backend API for:
 
 ## Upcoming Features
 
+- [ ] Forgot Password (Password Recovery Flow)
 - [ ] Notification System (Email/SMS/Push)
 - [ ] User Settings & Preferences (Dark Mode, 2FA, Privacy)
 - [ ] Health data visualization (advanced charts/graphs)

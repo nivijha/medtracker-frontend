@@ -56,7 +56,7 @@ const StatCard = ({ icon: Icon, label, value, accent = "slate", tooltip, onClick
 };
 
 const InfoRow = ({ icon: Icon, label, value }) => (
-  <div className="flex gap-6 p-8 bg-white rounded-[2rem] border border-slate-900/5 items-center group hover:border-teal-500/20 transition-all duration-300">
+  <div className="flex gap-4 sm:gap-6 p-6 sm:p-8 bg-white rounded-[2rem] border border-slate-900/5 items-center group hover:border-teal-500/20 transition-all duration-300">
     <div className="p-4 bg-slate-50 rounded-2xl group-hover:bg-teal-500/10 group-hover:text-teal-600 transition-colors duration-300">
       <Icon className="w-6 h-6 text-slate-400 group-hover:text-teal-600" />
     </div>
@@ -114,7 +114,7 @@ export default function ProfilePage() {
   return (
     <div className="space-y-12 animate-reveal-up">
       {/* HEADER SECTION */}
-      <div className="relative bg-slate-900 rounded-[3rem] md:rounded-[4rem] p-10 md:p-20 text-white overflow-hidden group">
+      <div className="relative bg-slate-900 rounded-[3rem] md:rounded-[4rem] p-6 sm:p-10 md:p-20 text-white overflow-hidden group">
         <div className="relative z-10 flex flex-col lg:flex-row lg:justify-between lg:items-center gap-10">
           <div className="flex flex-col md:flex-row items-center gap-10 text-center md:text-left">
             <div className="relative">
