@@ -27,8 +27,8 @@ export async function GET(request, { params }) {
   return new Response(buffer, {
     status: 200,
     headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": "inline",
+      "Content-Type": backendRes.headers.get("Content-Type") || "application/pdf",
+      "Content-Disposition": backendRes.headers.get("Content-Disposition") || "inline",
     },
   });
 }

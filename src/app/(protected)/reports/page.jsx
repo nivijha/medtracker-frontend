@@ -284,8 +284,8 @@ export default function EnhancedReportsPage() {
 
   const handleDownload = (report) => {
     const a = document.createElement("a");
-    a.href = report.fileUrl;
-    a.download = report.description || "medical-report";
+    a.href = `/api/reports/${report._id}/pdf`;
+    a.download = `${report.description || "medical-report"}.pdf`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -522,7 +522,7 @@ export default function EnhancedReportsPage() {
                       onChange={(e) => setUploadData({ ...uploadData, file: e.target.files[0] })}
                       className="hidden"
                       id="file-upload"
-                      accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                      accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx"
                     />
                     <label 
                       htmlFor="file-upload"
@@ -533,7 +533,7 @@ export default function EnhancedReportsPage() {
                         <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
                           {uploadData.file ? uploadData.file.name : "Select or Drop Clinical File"}
                         </p>
-                        <p className="text-[8px] font-bold uppercase tracking-widest text-slate-300 mt-2">PDF, JPG, PNG (Max 10MB)</p>
+                        <p className="text-[8px] font-bold uppercase tracking-widest text-slate-300 mt-2">PDF, JPG, PNG, WEBP (Max 10MB)</p>
                       </div>
                     </label>
                   </div>
