@@ -1,5 +1,6 @@
 import { Syne, Hanken_Grotesk } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import './globals.css';
 
 const syne = Syne({ 
@@ -64,6 +65,7 @@ export default function RootLayout({ children }) {
         <AuthProvider>
           {children}
           <Analytics />
+          <SpeedInsights />
         </AuthProvider>
       </body>
     </html>
