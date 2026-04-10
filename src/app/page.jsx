@@ -401,7 +401,7 @@ export default function LandingPage() {
           </div>
 
           {/* Contact */}
-          <div className="flex flex-col gap-3">
+          {/*<div className="flex flex-col gap-3">
             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Support</span>
             <button 
               onClick={() => setShowContactModal(true)}
@@ -411,17 +411,17 @@ export default function LandingPage() {
             </button>
             <a href="mailto:support@medtracker.app" className="text-sm text-slate-600 hover:text-teal-600 transition-colors"></a>
           </div>
-        </div>
+        </div>*/}
 
         <div className="pt-5 text-[10px] uppercase tracking-widest font-bold text-slate-400 text-center">
           © 2026 MedTracker
         </div>
       </footer>
 
-      <ContactModal 
+        {/*<ContactModal 
         isOpen={showContactModal} 
         onClose={() => setShowContactModal(false)} 
-      />
+      />*/}
 
     </div>
   );
